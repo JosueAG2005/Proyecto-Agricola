@@ -8,16 +8,9 @@
         <ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
       </div>
     @endif
-
     <form action="{{ route('organicos.update', $organico) }}" method="post">
       @method('PUT')
-      @include('organicos._form', [
-        'organico'   => $organico,
-        'categorias' => $categorias,
-        'variedades' => $variedades,
-        'unidades'   => $unidades,
-        'estados'    => $estados,
-      ])
+      @include('organicos._form', ['organico'=>$organico])
     </form>
   </div>
 </div>

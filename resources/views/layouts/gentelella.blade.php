@@ -18,15 +18,21 @@
             <a href="{{ url('/') }}" class="site_title"><i class="fa fa-leaf"></i> <span>Mercado Agrícola</span></a>
           </div>
           <br/>
-          <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-            <div class="menu_section">
-              <h3>Menú</h3>
-              <ul class="nav side-menu">
-                <li><a href="{{ route('organicos.index',[],false) }}"><i class="fa fa-pagelines"></i> Orgánicos</a></li>
-                <li><a href="{{ route('maquinarias.index',[],false) }}"><i class="fa fa-tractor"></i> Maquinaria</a></li>
-              </ul>
-            </div>
-          </div>
+       <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+  <div class="menu_section">
+    <h3>Menú</h3>
+    <ul class="nav side-menu">
+      <li><a><i class="fa fa-leaf"></i> Módulos <span class="fa fa-chevron-down"></span></a>
+        <ul class="nav child_menu">
+          <li><a href="{{ route('organicos.index', [], false) }}"><i class="fa fa-pagelines"></i> Orgánicos</a></li>
+          <li><a href="{{ route('maquinarias.index', [], false) }}"><i class="fa fa-tractor"></i> Maquinaria</a></li>
+          <li><a href="{{ route('categorias.index', [], false) }}"><i class="fa fa-tags"></i> Categorías</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
         </div>
       </div>
 

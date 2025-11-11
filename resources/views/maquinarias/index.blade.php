@@ -31,13 +31,7 @@
       <table class="table table-hover mb-0">
         <thead class="thead-light">
           <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Marca</th>
-            <th>Precio/día</th>
-            <th>Estado</th>
-            <th class="text-right pr-3">Acciones</th>
+            <th>#</th><th>Nombre</th><th>Tipo</th><th>Marca</th><th>Precio/día</th><th>Estado</th><th class="text-right pr-3">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -45,30 +39,15 @@
           <tr>
             <td>{{ $m->id }}</td>
             <td><a href="{{ route('maquinarias.show',$m) }}">{{ $m->nombre }}</a></td>
-
-            <td>{{ $m->tipoParam?->nombre ?? $m->tipo }}</td>
-            <td>{{ $m->marcaParam?->nombre ?? $m->marca }}</td>
-
+            <td>{{ $m->tipo }}</td>
+            <td>{{ $m->marca }}</td>
             <td>{{ number_format($m->precio_dia,2) }}</td>
-
             <td>
               @php
-                $estado = $m->estadoParam?->nombre ?? $m->estado;
-                $map = [
-                  'Disponible' => 'success',
-                  'En reparación' => 'secondary',
-                  'Reservado' => 'warning',
-                  'Vendido' => 'danger',
-                  'disponible' => 'success',
-                  'en_mantenimiento' => 'secondary',
-                  'dado_baja' => 'dark'
-                ];
+                $map = ['disponible'=>'success','en_mantenimiento'=>'secondary','vendido'=>'danger'];
               @endphp
-              <span class="badge badge-{{ $map[$estado] ?? 'light' }}">
-                {{ ucwords(str_replace('_',' ',$estado)) }}
-              </span>
+              <span class="badge badge-{{ $map[$m->estado] ?? 'light' }}">{{ str_replace('_',' ',$m->estado) }}</span>
             </td>
-
             <td class="text-right pr-3">
               <a href="{{ route('maquinarias.edit',$m) }}" class="btn btn-sm btn-primary">Editar</a>
               <form action="{{ route('maquinarias.destroy',$m) }}" method="post" class="d-inline">

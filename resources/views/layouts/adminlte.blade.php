@@ -39,6 +39,21 @@
             <i class="nav-icon fas fa-tractor"></i><p>Maquinaria</p>
           </a>
         </li>
+       <li class="nav-item">
+          <a href="{{ route('categorias.index') }}"
+             class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-tags"></i><p>Categorías</p>
+
+          </a>
+        </li>
+        <li class="nav-item">
+  <a href="{{ route('ganados.index') }}"
+     class="nav-link {{ request()->routeIs('ganados.*') ? 'active' : '' }}">
+    <i class="nav-icon fas fa-cow"></i>
+    <p>Ganado</p>
+  </a>
+</li>
+
       </ul>
     </nav>
   </div>

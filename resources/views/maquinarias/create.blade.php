@@ -8,15 +8,8 @@
         <ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
       </div>
     @endif
-
     <form action="{{ route('maquinarias.store') }}" method="post">
-      @include('maquinarias._form', [
-        'maquinaria' => null,
-        'tipos'      => $tipos,
-        'estados'    => $estados,
-        'marcas'     => $marcas,   {{-- normalmente [] --}}
-        'modelos'    => $modelos   {{-- normalmente [] --}}
-      ])
+      @include('maquinarias._form', ['maquinaria'=>null])
     </form>
   </div>
 </div>

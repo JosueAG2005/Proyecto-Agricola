@@ -29,14 +29,7 @@
       <table class="table table-hover mb-0">
         <thead class="thead-light">
           <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Variedad</th>
-            <th>Unidad</th>
-            <th>Estado</th>
-            <th>Precio</th>
-            <th>Stock</th>
+            <th>#</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th>
             <th class="text-right pr-3">Acciones</th>
           </tr>
         </thead>
@@ -45,15 +38,9 @@
           <tr>
             <td>{{ $o->id }}</td>
             <td><a href="{{ route('organicos.show',$o) }}">{{ $o->nombre }}</a></td>
-
-            <td>{{ $o->categoriaParam?->nombre ?? $o->categoria }}</td>
-            <td>{{ $o->variedadParam?->nombre ?? '-' }}</td>
-            <td>{{ $o->unidadParam?->nombre ?? '-' }}</td>
-            <td>{{ $o->estadoParam?->nombre ?? '-' }}</td>
-
+            <td>{{ $o->categoria }}</td>
             <td>{{ number_format($o->precio,2) }}</td>
             <td>{{ $o->stock }}</td>
-
             <td class="text-right pr-3">
               <a href="{{ route('organicos.edit',$o) }}" class="btn btn-sm btn-primary">Editar</a>
               <form action="{{ route('organicos.destroy',$o) }}" method="post" class="d-inline">
@@ -63,7 +50,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="9" class="text-center text-muted">Sin registros</td></tr>
+          <tr><td colspan="6" class="text-center text-muted">Sin registros</td></tr>
         @endforelse
         </tbody>
       </table>

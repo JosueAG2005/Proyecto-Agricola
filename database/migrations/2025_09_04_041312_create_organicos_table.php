@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('organicos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre')->unique();
-            $table->string('categoria');
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
             $table->decimal('precio', 10, 2)->default(0);
             $table->integer('stock')->default(0);
             $table->date('fecha_cosecha')->nullable();

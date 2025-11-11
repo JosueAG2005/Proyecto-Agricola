@@ -1,4 +1,5 @@
 @extends('layouts.adminlte')
+
 @section('content')
 <div class="x_panel">
   <div class="x_title"><h2>Nuevo Orgánico</h2></div>
@@ -10,13 +11,7 @@
     @endif
 
     <form action="{{ route('organicos.store') }}" method="post">
-      @include('organicos._form', [
-        'organico'   => null,
-        'categorias' => $categorias,
-        'variedades' => $variedades,
-        'unidades'   => $unidades,
-        'estados'    => $estados,
-      ])
+      @include('organicos._form', ['organico' => null])
     </form>
   </div>
 </div>
