@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('estado')->default('disponible');
             $table->text('descripcion')->nullable();
             $table->timestamps();
+            
         });
     }
 

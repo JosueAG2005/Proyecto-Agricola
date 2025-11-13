@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Gestión de Ganado'); ?>
 
 <?php $__env->startSection('content'); ?>

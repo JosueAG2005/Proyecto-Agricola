@@ -16,4 +16,9 @@ class Categoria extends Model
     {
         return $this->hasMany(Ganado::class);
     }
+    public function maquinarias()
+{
+    return $this->hasMany(Maquinaria::class, 'categoria_id');
+}
+
 }

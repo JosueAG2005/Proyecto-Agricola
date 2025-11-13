@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Registrar Ganado'); ?>
 
 <?php $__env->startSection('content'); ?>
