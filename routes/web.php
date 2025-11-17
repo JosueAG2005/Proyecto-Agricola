@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrganicoController;
 use App\Http\Controllers\MaquinariaController;
 use App\Http\Controllers\GanadoController;
+use App\Http\Controllers\TipoAnimalController;
+use App\Http\Controllers\TipoPesoController;
+use App\Http\Controllers\DatoSanitarioController;
+use App\Http\Controllers\RazaController;
 
 // 1) Raíz -> login (pantalla principal)
 Route::redirect('/', '/login');
@@ -30,6 +34,13 @@ Route::resource('categorias', App\Http\Controllers\CategoriaController::class);
 
 
 Route::resource('ganados', GanadoController::class);
+
+Route::resource('tipo_animals', TipoAnimalController::class);
+Route::resource('tipo-pesos', TipoPesoController::class);
+Route::resource('datos-sanitarios', DatoSanitarioController::class);
+Route::resource('razas', RazaController::class);
+
+
 
 
 

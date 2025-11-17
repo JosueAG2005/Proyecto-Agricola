@@ -11,19 +11,45 @@ class Ganado extends Model
 
     protected $fillable = [
         'nombre',
-        'tipo',
+        'tipo_animal_id',
+        'raza_id',
         'edad',
-        'peso',
+        'tipo_peso_id',
         'sexo',
-        'descripcion',
         'precio',
         'imagen',
+        'descripcion',
         'categoria_id',
+        'dato_sanitario_id',
+        'fecha_publicacion',
+        'ubicacion',
+        'latitud',
+        'longitud'
     ];
 
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
     }
-}
 
+    public function tipoAnimal()
+    {
+        return $this->belongsTo(\App\Models\TipoAnimal::class);
+    }
+
+    public function tipoPeso()
+    {
+        return $this->belongsTo(\App\Models\TipoPeso::class, 'tipo_peso_id');
+    }
+
+    public function raza()
+    {
+        return $this->belongsTo(Raza::class);
+    }
+
+    // ✅ RELACIÓN CORRECTA (uno a uno)
+    public function datoSanitario()
+    {
+        return $this->belongsTo(DatoSanitario::class, 'dato_sanitario_id');
+    }
+}

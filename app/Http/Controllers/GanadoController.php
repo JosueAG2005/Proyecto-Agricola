@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Ganado;
 use App\Models\Categoria;
+use App\Models\TipoAnimal;
+use App\Models\TipoPeso;
+use App\Models\Raza;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,95 +17,164 @@ class GanadoController extends Controller
      */
     public function index()
     {
-        $ganados = Ganado::with('categoria')->orderBy('id', 'desc')->paginate(10);
+        $ganados = Ganado::with(['categoria','raza','tipoAnimal','tipoPeso'])
+                        ->orderBy('id', 'desc')
+                        ->paginate(10);
+
         return view('ganados.index', compact('ganados'));
     }
 
     /**
      * Muestra el formulario de creación.
      */
-    public function create()
-    {
-        $categorias = Categoria::orderBy('nombre')->get();
-        return view('ganados.create', compact('categorias'));
-    }
+   public function create()
+{
+    $tipo_animals = TipoAnimal::orderBy('nombre')->get();
+    $categorias   = Categoria::orderBy('nombre')->get();
+    $tipoPesos    = TipoPeso::orderBy('nombre')->get();
+    $razas        = Raza::orderBy('nombre')->get();
+    $datosSanitarios = \App\Models\DatoSanitario::orderBy('id')->get();
+
+    return view('ganados.create', compact(
+        'tipo_animals',
+        'categorias',
+        'tipoPesos',
+        'razas',
+        'datosSanitarios'
+    ));
+}
+
 
     /**
      * Guarda un nuevo registro.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'tipo' => 'required|string',
-            'edad' => 'nullable|integer|min:0',
-            'peso' => 'nullable|numeric|min:0',
-            'sexo' => 'nullable|string',
-            'descripcion' => 'nullable|string',
-            'precio' => 'nullable|numeric|min:0',
-            'imagen' => 'nullable|image|max:2048',
-            'categoria_id' => 'required|exists:categorias,id',
-        ]);
+{
+    $request->validate([
+        'nombre'          => 'required|string|max:255',
+        'tipo_animal_id'  => 'required|exists:tipo_animals,id',
+        'raza_id'         => 'nullable|exists:razas,id',
+        'edad_anos'       => 'required|integer|min:0|max:25',
+        'edad_meses'      => 'required|integer|min:0|max:11',
+        'tipo_peso_id'    => 'required|exists:tipo_pesos,id',
+        'sexo'            => 'nullable|string',
+        'descripcion'     => 'nullable|string',
+        'precio'          => 'nullable|numeric|min:0',
+        'imagen'          => 'nullable|image|max:2048',
+        'categoria_id'    => 'required|exists:categorias,id',
+        'fecha_publicacion' => 'nullable|date',
+        'ubicacion' => 'nullable|string|max:255',
+        'latitud' => 'nullable|numeric',
+        'longitud' => 'nullable|numeric',
+    ]);
 
-        $data = $request->all();
+    $data = [
+        'nombre' => $request->nombre,
+        'tipo_animal_id' => $request->tipo_animal_id,
+        'raza_id' => $request->raza_id,
+        'edad' => ($request->edad_anos * 12) + $request->edad_meses,
+        'tipo_peso_id' => $request->tipo_peso_id,
+        'sexo' => $request->sexo,
+        'descripcion' => $request->descripcion,
+        'precio' => $request->precio,
+        'categoria_id' => $request->categoria_id,
+        'fecha_publicacion' => $request->fecha_publicacion,
+        'ubicacion' => $request->ubicacion,
+        'latitud' => $request->latitud,
+        'longitud' => $request->longitud,
+    ];
 
-        if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('ganados', 'public');
-        }
-
-        Ganado::create($data);
-
-        return redirect()->route('ganados.index')->with('success', 'Ganado registrado correctamente.');
+    if ($request->hasFile('imagen')) {
+        $data['imagen'] = $request->file('imagen')->store('ganados', 'public');
     }
 
-    /**
-     * Muestra un registro específico.
-     */
-    public function show(Ganado $ganado)
-    {
-        return view('ganados.show', compact('ganado'));
-    }
+    Ganado::create($data);
+
+    return redirect()->route('ganados.index')
+        ->with('success', 'Ganado registrado correctamente.');
+}
+
 
     /**
      * Muestra el formulario de edición.
      */
     public function edit(Ganado $ganado)
-    {
-        $categorias = Categoria::orderBy('nombre')->get();
-        return view('ganados.edit', compact('ganado', 'categorias'));
-    }
+{
+    $tipo_animals = TipoAnimal::orderBy('nombre')->get();
+    $categorias   = Categoria::orderBy('nombre')->get();
+    $tipoPesos    = TipoPeso::orderBy('nombre')->get();
+    $razas        = Raza::where('tipo_animal_id', $ganado->tipo_animal_id)->get();
+    $datosSanitarios = \App\Models\DatoSanitario::orderBy('id')->get();
+
+    return view('ganados.edit', compact(
+        'ganado',
+        'tipo_animals',
+        'categorias',
+        'tipoPesos',
+        'razas',
+        'datosSanitarios'
+    ));
+}
+
 
     /**
      * Actualiza un registro existente.
      */
-    public function update(Request $request, Ganado $ganado)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'tipo' => 'required|string',
-            'edad' => 'nullable|integer|min:0',
-            'peso' => 'nullable|numeric|min:0',
-            'sexo' => 'nullable|string',
-            'descripcion' => 'nullable|string',
-            'precio' => 'nullable|numeric|min:0',
-            'imagen' => 'nullable|image|max:2048',
-            'categoria_id' => 'required|exists:categorias,id',
-        ]);
+ public function update(Request $request, Ganado $ganado)
+{
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'tipo_animal_id' => 'required|exists:tipo_animals,id',
+        'raza_id' => 'nullable|exists:razas,id',
+        'edad_anos' => 'required|integer|min:0|max:25',
+        'edad_meses' => 'required|integer|min:0|max:11',
+        'sexo' => 'nullable|string',
+        'descripcion' => 'nullable|string',
+        'precio' => 'nullable|numeric|min:0',
+        'tipo_peso_id' => 'required|exists:tipo_pesos,id',
+        'imagen' => 'nullable|image|max:2048',
+        'categoria_id' => 'required|exists:categorias,id',
+        'ubicacion' => 'nullable|string|max:255',
+        'latitud' => 'nullable|numeric',
+        'longitud' => 'nullable|numeric',
+        'fecha_publicacion' => 'nullable|date',
+        // ❌ ESTA LÍNEA DEBE ELIMINARSE:
+        // 'dato_sanitario_id' => 'nullable|exists:datos_sanitarios,id',
+    ]);
 
-        $data = $request->all();
+    // Construimos el array SIN dato_sanitario_id
+    $data = [
+        'nombre' => $request->nombre,
+        'tipo_animal_id' => $request->tipo_animal_id,
+        'raza_id' => $request->raza_id,
+        'edad' => ($request->edad_anos * 12) + $request->edad_meses,
+        'tipo_peso_id' => $request->tipo_peso_id,
+        'sexo' => $request->sexo,
+        'descripcion' => $request->descripcion,
+        'precio' => $request->precio,
+        'categoria_id' => $request->categoria_id,
+        'ubicacion' => $request->ubicacion,
+        'latitud' => $request->latitud,
+        'longitud' => $request->longitud,
+        'fecha_publicacion' => $request->fecha_publicacion,
+    ];
 
-        if ($request->hasFile('imagen')) {
-            // Eliminar imagen anterior si existe
-            if ($ganado->imagen && Storage::disk('public')->exists($ganado->imagen)) {
-                Storage::disk('public')->delete($ganado->imagen);
-            }
-            $data['imagen'] = $request->file('imagen')->store('ganados', 'public');
+    // Imagen
+    if ($request->hasFile('imagen')) {
+
+        if ($ganado->imagen && Storage::disk('public')->exists($ganado->imagen)) {
+            Storage::disk('public')->delete($ganado->imagen);
         }
 
-        $ganado->update($data);
-
-        return redirect()->route('ganados.index')->with('success', 'Registro actualizado correctamente.');
+        $data['imagen'] = $request->file('imagen')->store('ganados', 'public');
     }
+
+    $ganado->update($data);
+
+    return redirect()->route('ganados.index')
+        ->with('success', 'Registro actualizado correctamente.');
+}
+
 
     /**
      * Elimina un registro.
@@ -114,6 +186,7 @@ class GanadoController extends Controller
         }
 
         $ganado->delete();
-        return redirect()->route('ganados.index')->with('success', 'Ganado eliminado correctamente.');
+        return redirect()->route('ganados.index')
+            ->with('success', 'Ganado eliminado correctamente.');
     }
 }

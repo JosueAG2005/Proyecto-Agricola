@@ -1,4 +1,5 @@
-@extends('layouts.gentelella')
+@extends('layouts.adminlte')
+
 
 @section('content')
 <div class="x_panel">

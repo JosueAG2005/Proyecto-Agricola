@@ -12,18 +12,22 @@ class UpdateOrganicoRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        return [
-            'nombre' => 'required|string|max:255|unique:organicos,nombre,' . $this->organico->id,
-            'categoria_id' => 'required|exists:categorias,id',
+{
+    return [
+        'nombre' => 'required|string|max:255',
+        'tipo_animal_id' => 'required|exists:tipo_animals,id',
+        'edad_anos' => 'required|integer|min:0|max:25',
+'edad_meses' => 'required|integer|min:0|max:11',
 
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+        'peso' => 'nullable|numeric|min:0',
+        'sexo' => 'nullable|string',
+        'categoria_id' => 'required|exists:categorias,id',
+        'descripcion' => 'nullable|string',
+        'precio' => 'nullable|numeric|min:0',
+        'imagen' => 'nullable|image'
+    ];
+}
 
-            'fecha_cosecha' => 'nullable|date',
-            'descripcion' => 'nullable|string|max:5000',
-        ];
-    }
 
     public function messages(): array
     {
