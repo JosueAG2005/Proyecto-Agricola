@@ -43,7 +43,7 @@ class MarcaMaquinariaController extends Controller
 
         MarcaMaquinaria::create($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('marcas_maquinarias.index')->with('ok', 'Marca de maquinaria creada');
+        return redirect()->route('admin.marcas_maquinarias.index')->with('ok', 'Marca de maquinaria creada');
     }
 
     /**
@@ -74,7 +74,7 @@ class MarcaMaquinariaController extends Controller
 
         $marcaMaquinaria->update($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('marcas_maquinarias.index')->with('ok', 'Marca de maquinaria actualizada');
+        return redirect()->route('admin.marcas_maquinarias.index')->with('ok', 'Marca de maquinaria actualizada');
     }
 
     /**
@@ -84,12 +84,12 @@ class MarcaMaquinariaController extends Controller
     {
         // Verificar si hay maquinarias usando esta marca
         if ($marcaMaquinaria->maquinarias()->count() > 0) {
-            return redirect()->route('marcas_maquinarias.index')
+            return redirect()->route('admin.marcas_maquinarias.index')
                 ->with('error', 'No se puede eliminar esta marca de maquinaria porque tiene maquinarias asociadas.');
         }
 
         $marcaMaquinaria->delete();
 
-        return redirect()->route('marcas_maquinarias.index')->with('ok', 'Marca de maquinaria eliminada');
+        return redirect()->route('admin.marcas_maquinarias.index')->with('ok', 'Marca de maquinaria eliminada');
     }
 }

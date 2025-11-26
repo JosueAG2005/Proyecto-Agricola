@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        <form action="{{ route('marcas_maquinarias.update', $marcaMaquinaria) }}" method="post">
+        <form action="{{ route('admin.marcas_maquinarias.update', $marcaMaquinaria) }}" method="post">
             @csrf @method('PUT')
 
             <div class="form-group">
@@ -57,7 +57,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Actualizar
                 </button>
-                <a href="{{ route('marcas_maquinarias.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.marcas_maquinarias.index') }}" class="btn btn-secondary">
                     <i class="fas fa-times"></i> Cancelar
                 </a>
             </div>

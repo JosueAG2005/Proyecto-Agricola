@@ -9,7 +9,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
 
-            <form action="<?php echo e(route('tipo-pesos.update', $tipoPeso->id)); ?>" method="POST">
+            <form action="<?php echo e(route('admin.tipo-pesos.update', $tipoPeso->id)); ?>" method="POST">
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('PUT'); ?>
 
@@ -27,7 +27,7 @@
                     <i class="fas fa-save"></i> Actualizar
                 </button>
 
-                <a href="<?php echo e(route('tipo-pesos.index')); ?>" class="btn btn-secondary">
+                <a href="<?php echo e(route('admin.tipo-pesos.index')); ?>" class="btn btn-secondary">
                     Cancelar
                 </a>
             </form>

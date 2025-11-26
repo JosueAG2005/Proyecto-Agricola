@@ -10,7 +10,7 @@
       </div>
     @endif
 
-    <form action="{{ route('organicos.store') }}" method="post">
+    <form action="{{ route('organicos.store') }}" method="post" enctype="multipart/form-data">
       @include('organicos._form', ['organico' => null])
     </form>
   </div>

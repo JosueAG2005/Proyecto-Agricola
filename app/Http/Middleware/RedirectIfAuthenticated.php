@@ -17,18 +17,7 @@ class RedirectIfAuthenticated
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            $user = Auth::user();
-            
-            // Redirigir según el rol
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.solicitudes-vendedor.index');
-            }
-            
-            if ($user->isVendedor()) {
-                return redirect()->route('ganados.index');
-            }
-            
-            // Cliente por defecto
+            // Todos los usuarios autenticados van a /inicio
             return redirect()->route('home');
         }
 

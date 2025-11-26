@@ -13,7 +13,7 @@
             <button class="btn btn-sm btn-primary">Buscar</button>
         </form>
 
-        <a href="{{ route('tipo_maquinarias.create') }}" class="btn btn-sm btn-success ml-2">
+        <a href="{{ route('admin.tipo_maquinarias.create') }}" class="btn btn-sm btn-success ml-2">
             <i class="fas fa-plus"></i> Nuevo
         </a>
     </div>
@@ -53,10 +53,10 @@
                     <td><strong>{{ $item->nombre }}</strong></td>
                     <td>{{ $item->descripcion ?? '—' }}</td>
                     <td class="text-right pr-3">
-                        <a href="{{ route('tipo_maquinarias.edit', $item) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.tipo_maquinarias.edit', $item) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <form action="{{ route('tipo_maquinarias.destroy', $item) }}" method="post" class="d-inline">
+                        <form action="{{ route('admin.tipo_maquinarias.destroy', $item) }}" method="post" class="d-inline">
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este tipo de maquinaria?')">
                                 <i class="fas fa-trash"></i> Eliminar

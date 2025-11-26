@@ -5,7 +5,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Editar Registro de Ganado</h1>
-        <a href="<?php echo e(route('ganados.index')); ?>" class="btn btn-secondary">
+        <a href="<?php echo e(url()->previous() !== url()->current() ? url()->previous() : route('ganados.index')); ?>" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
@@ -112,7 +112,19 @@
                     </select>
                 </div>
 
-               
+                
+                <div class="form-group mb-3">
+                    <label for="dato_sanitario_id">Datos Sanitarios</label>
+                    <select name="dato_sanitario_id" class="form-control">
+                        <option value="">Sin registro sanitario</option>
+                        <?php $__currentLoopData = $datosSanitarios; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ds): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($ds->id); ?>" <?php echo e($ganado->dato_sanitario_id == $ds->id ? 'selected' : ''); ?>>
+                                <?php echo e($ds->vacuna ?? 'Sin vacuna'); ?> - <?php echo e($ds->fecha_aplicacion ?? 'Sin fecha'); ?>
+
+                            </option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                </div>
 
                 
                 <div class="form-group mb-3">

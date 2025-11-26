@@ -9,7 +9,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
 
-            <form action="<?php echo e(route('tipo-pesos.store')); ?>" method="POST">
+            <form action="<?php echo e(route('admin.tipo-pesos.store')); ?>" method="POST">
                 <?php echo csrf_field(); ?>
 
                 <div class="mb-3">
@@ -26,7 +26,7 @@
                     <i class="fas fa-save"></i> Guardar
                 </button>
 
-                <a href="<?php echo e(route('tipo-pesos.index')); ?>" class="btn btn-secondary">
+                <a href="<?php echo e(route('admin.tipo-pesos.index')); ?>" class="btn btn-secondary">
                     Cancelar
                 </a>
             </form>

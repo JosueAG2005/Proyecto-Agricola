@@ -17,7 +17,7 @@ class GanadoController extends Controller
      */
     public function index()
     {
-        $ganados = Ganado::with(['categoria','raza','tipoAnimal','tipoPeso'])
+        $ganados = Ganado::with(['categoria','raza','tipoAnimal','tipoPeso','datoSanitario'])
                         ->orderBy('id', 'desc')
                         ->paginate(10);
 
@@ -76,6 +76,7 @@ class GanadoController extends Controller
         'ubicacion' => 'nullable|string|max:255',
         'latitud' => 'nullable|numeric',
         'longitud' => 'nullable|numeric',
+        'dato_sanitario_id' => 'nullable|exists:datos_sanitarios,id',
     ]);
 
     $data = [
@@ -93,6 +94,7 @@ class GanadoController extends Controller
         'ubicacion' => $request->ubicacion,
         'latitud' => $request->latitud,
         'longitud' => $request->longitud,
+        'dato_sanitario_id' => $request->dato_sanitario_id ?? null,
     ];
 
     if ($request->hasFile('imagen')) {
@@ -165,11 +167,9 @@ class GanadoController extends Controller
         'latitud' => 'nullable|numeric',
         'longitud' => 'nullable|numeric',
         'fecha_publicacion' => 'nullable|date',
-        // ❌ ESTA LÍNEA DEBE ELIMINARSE:
-        // 'dato_sanitario_id' => 'nullable|exists:datos_sanitarios,id',
+        'dato_sanitario_id' => 'nullable|exists:datos_sanitarios,id',
     ]);
 
-    // Construimos el array SIN dato_sanitario_id
     $data = [
         'nombre' => $request->nombre,
         'tipo_animal_id' => $request->tipo_animal_id,
@@ -185,6 +185,7 @@ class GanadoController extends Controller
         'latitud' => $request->latitud,
         'longitud' => $request->longitud,
         'fecha_publicacion' => $request->fecha_publicacion,
+        'dato_sanitario_id' => $request->dato_sanitario_id ?? null,
     ];
 
     // Imagen

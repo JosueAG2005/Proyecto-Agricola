@@ -8,6 +8,7 @@ use App\Http\Controllers\TipoAnimalController;
 use App\Http\Controllers\TipoPesoController;
 use App\Http\Controllers\DatoSanitarioController;
 use App\Http\Controllers\RazaController;
+use App\Http\Controllers\EstadoMaquinariaController;
 use App\Http\Controllers\SolicitudVendedorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -53,10 +54,17 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('categorias', App\Http\Controllers\CategoriaController::class);
     Route::resource('tipo_animals', TipoAnimalController::class);
     Route::resource('tipo-pesos', TipoPesoController::class);
-    Route::resource('datos-sanitarios', DatoSanitarioController::class);
     Route::resource('razas', RazaController::class);
     Route::resource('tipo_maquinarias', App\Http\Controllers\TipoMaquinariaController::class);
     Route::resource('marcas_maquinarias', App\Http\Controllers\MarcaMaquinariaController::class);
+    Route::resource('estado_maquinarias', EstadoMaquinariaController::class);
+    Route::resource('unidades_organicos', App\Http\Controllers\UnidadOrganicoController::class);
+});
+
+// ===== VENDEDOR Y ADMINISTRADOR =====
+// Datos sanitarios (VENDEDOR y ADMIN pueden acceder)
+Route::middleware(['auth', 'role.vendedor'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('datos-sanitarios', DatoSanitarioController::class);
 });
 
 // ===== VENDEDOR Y ADMINISTRADOR =====
@@ -77,6 +85,14 @@ Route::middleware('auth')->group(function () {
     Route::get('maquinarias/{maquinaria}', [MaquinariaController::class, 'show'])->name('maquinarias.show');
     Route::get('organicos', [OrganicoController::class, 'index'])->name('organicos.index');
     Route::get('organicos/{organico}', [OrganicoController::class, 'show'])->name('organicos.show');
+    
+    // Carrito de compras
+    Route::get('carrito', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+    Route::post('carrito/agregar', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+    Route::put('carrito/{cartItem}', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+    Route::delete('carrito/{cartItem}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('carrito', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
+    Route::get('carrito/count', [App\Http\Controllers\CartController::class, 'getCount'])->name('cart.count');
 });
 
 // ===== CLIENTE =====

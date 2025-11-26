@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Tipos de Peso</h1>
-        <a href="{{ route('tipo-pesos.create') }}" class="btn btn-success">
+        <a href="{{ route('admin.tipo-pesos.create') }}" class="btn btn-success">
             <i class="fas fa-plus-circle"></i> Nuevo Tipo de Peso
         </a>
     </div>
@@ -36,11 +36,11 @@
                             <td>{{ $item->nombre }}</td>
                             <td>{{ $item->descripcion ?? '—' }}</td>
                             <td>
-                                <a href="{{ route('tipo-pesos.edit', $item->id) }}" class="btn btn-warning btn-sm">
+                                <a href="{{ route('admin.tipo-pesos.edit', $item->id) }}" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form action="{{ route('tipo-pesos.destroy', $item->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.tipo-pesos.destroy', $item->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este tipo de peso?')">

@@ -60,10 +60,11 @@
             <td><?php echo e($m->marcaMaquinaria->nombre ?? '—'); ?></td>
             <td><?php echo e(number_format($m->precio_dia,2)); ?></td>
             <td>
-              <?php
-                $map = ['disponible'=>'success','en_mantenimiento'=>'secondary','vendido'=>'danger'];
-              ?>
-              <span class="badge badge-<?php echo e($map[$m->estado] ?? 'light'); ?>"><?php echo e(str_replace('_',' ',$m->estado)); ?></span>
+              <?php if($m->estadoMaquinaria): ?>
+                <span class="badge badge-info"><?php echo e($m->estadoMaquinaria->nombre); ?></span>
+              <?php else: ?>
+                <span class="badge badge-secondary">—</span>
+              <?php endif; ?>
             </td>
             <td class="text-right pr-3">
               <?php if(auth()->check() && (auth()->user()->isVendedor() || auth()->user()->isAdmin())): ?>

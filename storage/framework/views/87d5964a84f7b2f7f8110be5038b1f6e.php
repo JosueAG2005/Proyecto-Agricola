@@ -29,11 +29,48 @@
       <div id="topnav" class="collapse navbar-collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link text-white <?php echo e(request()->routeIs('home')?'active':''); ?>" href="<?php echo e(route('home')); ?>">Inicio</a>
+            <a class="nav-link text-white <?php echo e(request()->routeIs('home')?'active':''); ?>" href="<?php echo e(route('home')); ?>">
+              <i class="fas fa-home"></i> Inicio
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="<?php echo e(route('ads.index')); ?>">Anuncios</a>
+            <a class="nav-link text-white <?php echo e(request()->routeIs('ads.index')?'active':''); ?>" href="<?php echo e(route('ads.index')); ?>">
+              <i class="fas fa-bullhorn"></i> Anuncios
+            </a>
           </li>
+          <?php if(auth()->guard()->check()): ?>
+            <?php if(auth()->user()->isVendedor() || auth()->user()->isAdmin()): ?>
+              <li class="nav-item">
+                <a class="nav-link text-white <?php echo e(request()->routeIs('admin.datos-sanitarios.*')?'active':''); ?>" href="<?php echo e(route('admin.datos-sanitarios.index')); ?>">
+                  <i class="fas fa-syringe"></i> Datos Sanitarios
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if(auth()->user()->isCliente()): ?>
+              <li class="nav-item">
+                <a class="nav-link text-white <?php echo e(request()->routeIs('solicitar-vendedor')?'active':''); ?>" href="<?php echo e(route('solicitar-vendedor')); ?>">
+                  <i class="fas fa-user-tie"></i> Ser Vendedor
+                </a>
+              </li>
+            <?php endif; ?>
+            <li class="nav-item">
+              <a class="nav-link text-white <?php echo e(request()->routeIs('cart.*')?'active':''); ?>" href="<?php echo e(route('cart.index')); ?>">
+                <i class="fas fa-shopping-cart"></i> Carrito
+                <?php
+                  $cartCount = \App\Models\CartItem::where('user_id', auth()->id())->sum('cantidad');
+                ?>
+                <?php if($cartCount > 0): ?>
+                  <span class="badge badge-danger badge-sm" id="cart-count"><?php echo e($cartCount); ?></span>
+                <?php endif; ?>
+              </a>
+            </li>
+          <?php else: ?>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="<?php echo e(route('solicitar-vendedor')); ?>">
+                <i class="fas fa-user-tie"></i> Ser Vendedor
+              </a>
+            </li>
+          <?php endif; ?>
           <?php if(auth()->guard()->check()): ?>
             <li class="nav-item dropdown">
               <a class="nav-link text-white dropdown-toggle" href="#" data-toggle="dropdown">
@@ -101,4 +138,5 @@
 <script src="<?php echo e(asset('vendor/adminlte/dist/js/adminlte.min.js')); ?>"></script>
 </body>
 </html>
+
 <?php /**PATH C:\dev\Proyecto-Mercado-Agricola-main\Proyecto-Mercado-Agricola-main\resources\views/layouts/public.blade.php ENDPATH**/ ?>

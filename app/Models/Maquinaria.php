@@ -12,10 +12,15 @@ class Maquinaria extends Model
     'tipo_maquinaria_id',
     'marca_maquinaria_id',
     'modelo',
+    'telefono',
     'precio_dia',
     'estado',
+    'estado_maquinaria_id',
     'descripcion',
-    'categoria_id', 
+    'categoria_id',
+    'ubicacion',
+    'latitud',
+    'longitud',
 ];
 
     /**
@@ -48,6 +53,22 @@ class Maquinaria extends Model
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
+    }
+
+    /**
+     * Relación: una maquinaria pertenece a un estado de maquinaria
+     */
+    public function estadoMaquinaria()
+    {
+        return $this->belongsTo(EstadoMaquinaria::class, 'estado_maquinaria_id');
+    }
+
+    /**
+     * Relación: una maquinaria tiene muchas imágenes
+     */
+    public function imagenes()
+    {
+        return $this->hasMany(MaquinariaImagen::class)->orderBy('orden');
     }
 }
 

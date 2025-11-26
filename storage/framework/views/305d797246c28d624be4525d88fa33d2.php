@@ -8,7 +8,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form action="<?php echo e(route('razas.store')); ?>" method="POST">
+            <form action="<?php echo e(route('admin.razas.store')); ?>" method="POST">
                 <?php echo csrf_field(); ?>
 
                 <div class="mb-3">
@@ -32,7 +32,7 @@
                 </div>
 
                 <button class="btn btn-success">Guardar</button>
-                <a href="<?php echo e(route('razas.index')); ?>" class="btn btn-secondary">Cancelar</a>
+                <a href="<?php echo e(route('admin.razas.index')); ?>" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

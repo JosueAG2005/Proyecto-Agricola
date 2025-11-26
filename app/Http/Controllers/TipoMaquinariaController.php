@@ -43,7 +43,7 @@ class TipoMaquinariaController extends Controller
 
         TipoMaquinaria::create($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria creado');
+        return redirect()->route('admin.tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria creado');
     }
 
     /**
@@ -74,7 +74,7 @@ class TipoMaquinariaController extends Controller
 
         $tipoMaquinaria->update($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria actualizado');
+        return redirect()->route('admin.tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria actualizado');
     }
 
     /**
@@ -84,12 +84,12 @@ class TipoMaquinariaController extends Controller
     {
         // Verificar si hay maquinarias usando este tipo
         if ($tipoMaquinaria->maquinarias()->count() > 0) {
-            return redirect()->route('tipo_maquinarias.index')
+            return redirect()->route('admin.tipo_maquinarias.index')
                 ->with('error', 'No se puede eliminar este tipo de maquinaria porque tiene maquinarias asociadas.');
         }
 
         $tipoMaquinaria->delete();
 
-        return redirect()->route('tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria eliminado');
+        return redirect()->route('admin.tipo_maquinarias.index')->with('ok', 'Tipo de maquinaria eliminado');
     }
 }

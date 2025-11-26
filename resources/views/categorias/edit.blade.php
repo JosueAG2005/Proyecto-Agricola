@@ -8,7 +8,7 @@
     </div>
 
     <div class="x_content">
-        <form action="{{ route('categorias.update', $categoria) }}" method="POST">
+        <form action="{{ route('admin.categorias.update', $categoria) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -26,7 +26,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Cancelar</a>
+            <a href="{{ route('admin.categorias.index') }}" class="btn btn-secondary">Cancelar</a>
 
         </form>
     </div>

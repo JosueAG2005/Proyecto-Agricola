@@ -11,6 +11,6 @@
         </div>
     </div>
 
-    <a href="{{ route('categorias.index') }}" class="btn btn-secondary mt-3">Volver</a>
+    <a href="{{ route('admin.categorias.index') }}" class="btn btn-secondary mt-3">Volver</a>
 </div>
 @endsection

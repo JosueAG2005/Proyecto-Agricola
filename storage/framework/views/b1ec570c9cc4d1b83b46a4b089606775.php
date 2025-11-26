@@ -8,7 +8,7 @@
       </div>
     <?php endif; ?>
 
-    <form action="<?php echo e(route('organicos.store')); ?>" method="post">
+    <form action="<?php echo e(route('organicos.store')); ?>" method="post" enctype="multipart/form-data">
       <?php echo $__env->make('organicos._form', ['organico' => null], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </form>
   </div>

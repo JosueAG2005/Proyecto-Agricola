@@ -9,7 +9,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
 
-            <form action="{{ route('tipo-pesos.update', $tipoPeso->id) }}" method="POST">
+            <form action="{{ route('admin.tipo-pesos.update', $tipoPeso->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -27,7 +27,7 @@
                     <i class="fas fa-save"></i> Actualizar
                 </button>
 
-                <a href="{{ route('tipo-pesos.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.tipo-pesos.index') }}" class="btn btn-secondary">
                     Cancelar
                 </a>
             </form>

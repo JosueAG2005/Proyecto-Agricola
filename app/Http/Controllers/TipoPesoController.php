@@ -27,7 +27,7 @@ class TipoPesoController extends Controller
 
         TipoPeso::create($request->all());
 
-        return redirect()->route('tipo-pesos.index')
+        return redirect()->route('admin.tipo-pesos.index')
             ->with('success', 'Tipo de Peso creado correctamente.');
     }
 
@@ -45,7 +45,7 @@ class TipoPesoController extends Controller
 
         $tipoPeso->update($request->all());
 
-        return redirect()->route('tipo-pesos.index')
+        return redirect()->route('admin.tipo-pesos.index')
             ->with('success', 'Tipo de Peso actualizado correctamente.');
     }
 
@@ -53,7 +53,7 @@ class TipoPesoController extends Controller
     {
         $tipoPeso->delete();
 
-        return redirect()->route('tipo-pesos.index')
+        return redirect()->route('admin.tipo-pesos.index')
             ->with('success', 'Tipo de Peso eliminado correctamente.');
     }
 }

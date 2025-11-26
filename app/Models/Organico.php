@@ -21,10 +21,14 @@ class Organico extends Model
         'nombre',
         'user_id',
         'categoria_id',
+        'unidad_id',
         'precio',
         'stock',
         'fecha_cosecha',
         'descripcion',
+        'origen',
+        'latitud_origen',
+        'longitud_origen',
     ];
 
     /**
@@ -41,5 +45,21 @@ class Organico extends Model
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
+    }
+
+    /**
+     * Relación: un orgánico pertenece a una unidad de medida
+     */
+    public function unidad()
+    {
+        return $this->belongsTo(UnidadOrganico::class, 'unidad_id');
+    }
+
+    /**
+     * Relación: un orgánico tiene muchas imágenes
+     */
+    public function imagenes()
+    {
+        return $this->hasMany(OrganicoImagen::class)->orderBy('orden');
     }
 }

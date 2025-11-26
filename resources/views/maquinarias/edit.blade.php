@@ -8,7 +8,7 @@
         <ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
       </div>
     @endif
-    <form action="{{ route('maquinarias.update', $maquinaria) }}" method="post">
+    <form action="{{ route('maquinarias.update', $maquinaria) }}" method="post" enctype="multipart/form-data">
       @method('PUT')
       @include('maquinarias._form', ['maquinaria'=>$maquinaria])
     </form>

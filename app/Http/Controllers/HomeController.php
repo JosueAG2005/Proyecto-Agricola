@@ -30,7 +30,7 @@ class HomeController extends Controller
         // Si hay búsqueda o filtros, buscar (siempre mostrar todos los tipos)
         if ($q || $categoria_id) {
             // Búsqueda en Ganados (siempre mostrar)
-            $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza'])
+            $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario'])
                 ->where(function($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
@@ -46,7 +46,7 @@ class HomeController extends Controller
             $ganados = $ganadosQuery->orderBy('created_at', 'desc')->paginate(12);
             
             // Búsqueda en Maquinarias (siempre mostrar)
-            $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria'])
+            $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
                 ->where(function($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
@@ -67,7 +67,7 @@ class HomeController extends Controller
             $maquinarias = $maquinariasQuery->orderBy('created_at', 'desc')->paginate(12);
             
             // Búsqueda en Orgánicos (siempre mostrar)
-            $organicosQuery = Organico::with('categoria')
+            $organicosQuery = Organico::with(['categoria', 'imagenes', 'unidad'])
                 ->where(function($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
@@ -81,20 +81,20 @@ class HomeController extends Controller
             
             $organicos = $organicosQuery->orderBy('created_at', 'desc')->paginate(12);
         } else {
-            // Sin búsqueda: mostrar productos destacados/recientes (últimos 6 de cada tipo)
-            $ganados = Ganado::with(['categoria', 'tipoAnimal', 'raza'])
+            // Sin búsqueda: mostrar productos destacados/recientes (últimos 3 de cada tipo)
+            $ganados = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario'])
                 ->orderBy('created_at', 'desc')
-                ->take(6)
+                ->take(3)
                 ->get();
             
-            $maquinarias = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria'])
+            $maquinarias = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
                 ->orderBy('created_at', 'desc')
-                ->take(6)
+                ->take(3)
                 ->get();
             
-            $organicos = Organico::with('categoria')
+            $organicos = Organico::with(['categoria', 'imagenes', 'unidad'])
                 ->orderBy('created_at', 'desc')
-                ->take(6)
+                ->take(3)
                 ->get();
         }
         
@@ -127,7 +127,7 @@ class HomeController extends Controller
         $organicos = collect();
         
         // Búsqueda en Ganados (siempre mostrar, sin filtro de tipo)
-        $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza'])
+        $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario'])
             ->where(function($query) use ($q) {
                 if ($q) {
                     $query->where('nombre', 'ilike', "%{$q}%")
@@ -143,7 +143,7 @@ class HomeController extends Controller
         $ganados = $ganadosQuery->orderBy('created_at', 'desc')->paginate(12, ['*'], 'ganados_page');
         
         // Búsqueda en Maquinarias (siempre mostrar, sin filtro de tipo)
-        $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria'])
+        $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
             ->where(function($query) use ($q) {
                 if ($q) {
                     $query->where('nombre', 'ilike', "%{$q}%")
@@ -164,7 +164,7 @@ class HomeController extends Controller
         $maquinarias = $maquinariasQuery->orderBy('created_at', 'desc')->paginate(12, ['*'], 'maquinarias_page');
         
         // Búsqueda en Orgánicos (siempre mostrar, sin filtro de tipo)
-        $organicosQuery = Organico::with('categoria')
+        $organicosQuery = Organico::with(['categoria', 'imagenes', 'unidad'])
             ->where(function($query) use ($q) {
                 if ($q) {
                     $query->where('nombre', 'ilike', "%{$q}%")
@@ -184,17 +184,17 @@ class HomeController extends Controller
         $misOrganicos = collect();
         
         if (auth()->check() && (auth()->user()->isVendedor() || auth()->user()->isAdmin())) {
-            $misGanados = Ganado::with(['categoria', 'tipoAnimal', 'raza'])
+            $misGanados = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario'])
                 ->where('user_id', auth()->id())
                 ->orderBy('created_at', 'desc')
                 ->get();
             
-            $misMaquinarias = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria'])
+            $misMaquinarias = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
                 ->where('user_id', auth()->id())
                 ->orderBy('created_at', 'desc')
                 ->get();
             
-            $misOrganicos = Organico::with('categoria')
+            $misOrganicos = Organico::with(['categoria', 'imagenes', 'unidad'])
                 ->where('user_id', auth()->id())
                 ->orderBy('created_at', 'desc')
                 ->get();

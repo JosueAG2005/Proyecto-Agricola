@@ -30,7 +30,7 @@ class RazaController extends Controller
 
         Raza::create($request->all());
 
-        return redirect()->route('razas.index')
+        return redirect()->route('admin.razas.index')
             ->with('success', 'Raza registrada correctamente.');
     }
 
@@ -50,7 +50,7 @@ class RazaController extends Controller
 
         $raza->update($request->all());
 
-        return redirect()->route('razas.index')
+        return redirect()->route('admin.razas.index')
             ->with('success', 'Raza actualizada correctamente.');
     }
 
@@ -58,7 +58,7 @@ class RazaController extends Controller
     {
         $raza->delete();
 
-        return redirect()->route('razas.index')
+        return redirect()->route('admin.razas.index')
             ->with('success', 'Raza eliminada correctamente.');
     }
 }

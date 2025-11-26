@@ -5,7 +5,7 @@
         <div class="clearfix"></div>
     </div>
     <div class="x_content">
-        <form action="<?php echo e(route('categorias.store')); ?>" method="POST">
+        <form action="<?php echo e(route('admin.categorias.store')); ?>" method="POST">
             <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label>Nombre</label>
@@ -16,7 +16,7 @@
                 <textarea name="descripcion" class="form-control"></textarea>
             </div>
             <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="<?php echo e(route('categorias.index')); ?>" class="btn btn-secondary">Cancelar</a>
+            <a href="<?php echo e(route('admin.categorias.index')); ?>" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

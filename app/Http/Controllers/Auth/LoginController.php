@@ -63,17 +63,7 @@ class LoginController extends Controller
      */
     private function redirectByRole()
     {
-        $user = Auth::user();
-
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.solicitudes-vendedor.index');
-        }
-
-        if ($user->isVendedor()) {
-            return redirect()->route('ganados.index');
-        }
-
-        // Cliente por defecto
+        // Todos los usuarios van a /inicio después de iniciar sesión
         return redirect()->route('home');
     }
 }

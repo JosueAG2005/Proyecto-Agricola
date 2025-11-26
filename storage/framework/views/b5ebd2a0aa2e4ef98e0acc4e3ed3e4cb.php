@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Razas</h1>
-        <a href="<?php echo e(route('razas.create')); ?>" class="btn btn-success">
+        <a href="<?php echo e(route('admin.razas.create')); ?>" class="btn btn-success">
             <i class="fas fa-plus-circle"></i> Nueva Raza
         </a>
     </div>
@@ -35,10 +35,10 @@
                             <td><?php echo e($raza->tipoAnimal->nombre ?? '—'); ?></td>
                             <td><?php echo e($raza->descripcion ?? '—'); ?></td>
                             <td>
-                                <a href="<?php echo e(route('razas.edit', $raza->id)); ?>" class="btn btn-warning btn-sm">
+                                <a href="<?php echo e(route('admin.razas.edit', $raza->id)); ?>" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="<?php echo e(route('razas.destroy', $raza->id)); ?>" method="POST" class="d-inline">
+                                <form action="<?php echo e(route('admin.razas.destroy', $raza->id)); ?>" method="POST" class="d-inline">
                                     <?php echo csrf_field(); ?>
                                     <?php echo method_field('DELETE'); ?>
                                     <button class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar raza?')">

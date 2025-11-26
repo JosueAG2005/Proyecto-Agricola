@@ -6,7 +6,7 @@
     </div>
 
     <div class="x_content">
-        <form action="<?php echo e(route('categorias.update', $categoria)); ?>" method="POST">
+        <form action="<?php echo e(route('admin.categorias.update', $categoria)); ?>" method="POST">
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
 
@@ -25,7 +25,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="<?php echo e(route('categorias.index')); ?>" class="btn btn-secondary">Cancelar</a>
+            <a href="<?php echo e(route('admin.categorias.index')); ?>" class="btn btn-secondary">Cancelar</a>
 
         </form>
     </div>

@@ -29,11 +29,48 @@
       <div id="topnav" class="collapse navbar-collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link text-white {{ request()->routeIs('home')?'active':'' }}" href="{{ route('home') }}">Inicio</a>
+            <a class="nav-link text-white {{ request()->routeIs('home')?'active':'' }}" href="{{ route('home') }}">
+              <i class="fas fa-home"></i> Inicio
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="{{ route('ads.index') }}">Anuncios</a>
+            <a class="nav-link text-white {{ request()->routeIs('ads.index')?'active':'' }}" href="{{ route('ads.index') }}">
+              <i class="fas fa-bullhorn"></i> Anuncios
+            </a>
           </li>
+          @auth
+            @if(auth()->user()->isVendedor() || auth()->user()->isAdmin())
+              <li class="nav-item">
+                <a class="nav-link text-white {{ request()->routeIs('admin.datos-sanitarios.*')?'active':'' }}" href="{{ route('admin.datos-sanitarios.index') }}">
+                  <i class="fas fa-syringe"></i> Datos Sanitarios
+                </a>
+              </li>
+            @endif
+            @if(auth()->user()->isCliente())
+              <li class="nav-item">
+                <a class="nav-link text-white {{ request()->routeIs('solicitar-vendedor')?'active':'' }}" href="{{ route('solicitar-vendedor') }}">
+                  <i class="fas fa-user-tie"></i> Ser Vendedor
+                </a>
+              </li>
+            @endif
+            <li class="nav-item">
+              <a class="nav-link text-white {{ request()->routeIs('cart.*')?'active':'' }}" href="{{ route('cart.index') }}">
+                <i class="fas fa-shopping-cart"></i> Carrito
+                @php
+                  $cartCount = \App\Models\CartItem::where('user_id', auth()->id())->sum('cantidad');
+                @endphp
+                @if($cartCount > 0)
+                  <span class="badge badge-danger badge-sm" id="cart-count">{{ $cartCount }}</span>
+                @endif
+              </a>
+            </li>
+          @else
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ route('solicitar-vendedor') }}">
+                <i class="fas fa-user-tie"></i> Ser Vendedor
+              </a>
+            </li>
+          @endauth
           @auth
             <li class="nav-item dropdown">
               <a class="nav-link text-white dropdown-toggle" href="#" data-toggle="dropdown">
@@ -100,3 +137,4 @@
 <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
 </body>
 </html>
+

@@ -7,7 +7,7 @@
         <ul><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><li><?php echo e($e); ?></li><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></ul>
       </div>
     <?php endif; ?>
-    <form action="<?php echo e(route('maquinarias.store')); ?>" method="post">
+    <form action="<?php echo e(route('maquinarias.store')); ?>" method="post" enctype="multipart/form-data">
       <?php echo $__env->make('maquinarias._form', ['maquinaria'=>null], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </form>
   </div>

@@ -8,7 +8,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form action="{{ route('razas.update', $raza->id) }}" method="POST">
+            <form action="{{ route('admin.razas.update', $raza->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -34,7 +34,7 @@
                 </div>
 
                 <button class="btn btn-primary">Actualizar</button>
-                <a href="{{ route('razas.index') }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ route('admin.razas.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

@@ -8,7 +8,7 @@
   <div class="x_content">
     <div class="row mb-3">
       <div class="col-md-4">
-        <form action="<?php echo e(route('categorias.index')); ?>" method="GET">
+        <form action="<?php echo e(route('admin.categorias.index')); ?>" method="GET">
           <div class="input-group">
             <input type="text" name="buscar" class="form-control" placeholder="Buscar..." value="<?php echo e(request('buscar')); ?>">
             <span class="input-group-btn">
@@ -18,7 +18,7 @@
         </form>
       </div>
       <div class="col-md-8 text-right">
-        <a href="<?php echo e(route('categorias.create')); ?>" class="btn btn-success">Nueva</a>
+        <a href="<?php echo e(route('admin.categorias.create')); ?>" class="btn btn-success">Nueva</a>
         <a href="<?php echo e(route('organicos.index')); ?>" class="btn btn-info">Ir a Orgánicos</a>
       </div>
     </div>
@@ -39,8 +39,8 @@
             <td><?php echo e($categoria->nombre); ?></td>
             <td><?php echo e($categoria->descripcion); ?></td>
             <td>
-              <a href="<?php echo e(route('categorias.edit', $categoria)); ?>" class="btn btn-primary btn-sm">Editar</a>
-              <form action="<?php echo e(route('categorias.destroy', $categoria)); ?>" method="POST" style="display:inline;">
+              <a href="<?php echo e(route('admin.categorias.edit', $categoria)); ?>" class="btn btn-primary btn-sm">Editar</a>
+              <form action="<?php echo e(route('admin.categorias.destroy', $categoria)); ?>" method="POST" style="display:inline;">
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('DELETE'); ?>
                 <button class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta categoría?')">Eliminar</button>

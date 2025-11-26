@@ -122,9 +122,17 @@
           @foreach($maquinarias as $maquinaria)
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-tractor fa-4x text-success"></i>
-                </div>
+                @if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0)
+                  <img src="{{ asset('storage/'.$maquinaria->imagenes->first()->ruta) }}" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('{{ asset('storage/'.$maquinaria->imagenes->first()->ruta) }}', '_blank')"
+                       alt="{{ $maquinaria->nombre }}">
+                @else
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-tractor fa-4x text-success"></i>
+                  </div>
+                @endif
                 <div class="card-body">
                   <h5 class="card-title">{{ $maquinaria->nombre }}</h5>
                   <p class="card-text text-muted small mb-2">
@@ -168,16 +176,29 @@
           @foreach($organicos as $organico)
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-leaf fa-4x text-success"></i>
-                </div>
+                @if($organico->imagenes && $organico->imagenes->count() > 0)
+                  <img src="{{ asset('storage/'.$organico->imagenes->first()->ruta) }}" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('{{ asset('storage/'.$organico->imagenes->first()->ruta) }}', '_blank')"
+                       alt="{{ $organico->nombre }}">
+                @else
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-leaf fa-4x text-success"></i>
+                  </div>
+                @endif
                 <div class="card-body">
                   <h5 class="card-title">{{ $organico->nombre }}</h5>
                   <p class="card-text text-muted small mb-2">
                     <i class="fas fa-tag"></i> {{ $organico->categoria->nombre ?? 'Sin categoría' }}
+                    @if($organico->unidad)
+                      | <i class="fas fa-balance-scale"></i> {{ $organico->unidad->nombre }}
+                    @endif
                   </p>
                   <div class="mb-2">
-                    <span class="badge badge-success">Stock: {{ $organico->stock ?? 0 }}</span>
+                    @if($organico->stock)
+                      <span class="badge badge-info">Stock: {{ $organico->stock }}</span>
+                    @endif
                   </div>
                   @if($organico->precio)
                     <p class="h5 text-success mb-0">Bs {{ number_format($organico->precio, 2) }}</p>
@@ -226,16 +247,19 @@
           Encuentra anuncios de productos y servicios especializados y a sus proveedores directos.
         </p>
         <div class="d-flex flex-column flex-md-row gap-3">
-          <a href="{{ route('ads.index') }}" class="btn btn-success btn-lg px-5">
-            <i class="fas fa-search"></i> Navega
+          <a href="{{ route('ads.index') }}" class="btn btn-success btn-lg px-5 shadow-sm">
+            <i class="fas fa-search"></i> Navegar Anuncios
           </a>
           @auth
             @if(auth()->user()->isCliente())
-              <a href="{{ route('solicitar-vendedor') }}" class="btn btn-primary btn-lg px-5">
+              <a href="{{ route('solicitar-vendedor') }}" class="btn btn-primary btn-lg px-5 shadow-sm">
                 <i class="fas fa-user-tie"></i> Ser Vendedor
               </a>
             @endif
           @else
+            <a href="{{ route('solicitar-vendedor') }}" class="btn btn-primary btn-lg px-5 shadow-sm">
+              <i class="fas fa-user-tie"></i> Ser Vendedor
+            </a>
             <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg px-5">
               <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
             </a>
@@ -251,7 +275,7 @@
           <i class="fas fa-cow"></i> Animales Destacados
         </h3>
         <div class="row">
-          @foreach($ganados->take(6) as $ganado)
+          @foreach($ganados->take(3) as $ganado)
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
                 @if($ganado->imagen)
@@ -278,9 +302,24 @@
                   @endif
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="{{ route('ganados.show', $ganado->id) }}" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="{{ route('ganados.show', $ganado->id) }}" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    @auth
+                      @if($ganado->precio && ($ganado->stock ?? 0) > 0)
+                        <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                          @csrf
+                          <input type="hidden" name="product_type" value="ganado">
+                          <input type="hidden" name="product_id" value="{{ $ganado->id }}">
+                          <input type="hidden" name="cantidad" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      @endif
+                    @endauth
+                  </div>
                 </div>
               </div>
             </div>
@@ -300,12 +339,20 @@
           <i class="fas fa-tractor"></i> Maquinaria Destacada
         </h3>
         <div class="row">
-          @foreach($maquinarias->take(6) as $maquinaria)
+          @foreach($maquinarias->take(3) as $maquinaria)
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-tractor fa-4x text-success"></i>
-                </div>
+                @if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0)
+                  <img src="{{ asset('storage/'.$maquinaria->imagenes->first()->ruta) }}" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('{{ asset('storage/'.$maquinaria->imagenes->first()->ruta) }}', '_blank')"
+                       alt="{{ $maquinaria->nombre }}">
+                @else
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-tractor fa-4x text-success"></i>
+                  </div>
+                @endif
                 <div class="card-body">
                   <h5 class="card-title">{{ $maquinaria->nombre }}</h5>
                   <p class="card-text text-muted small mb-2">
@@ -316,9 +363,25 @@
                   @endif
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="{{ route('maquinarias.show', $maquinaria->id) }}" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="{{ route('maquinarias.show', $maquinaria->id) }}" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    @auth
+                      @if($maquinaria->precio_dia)
+                        <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                          @csrf
+                          <input type="hidden" name="product_type" value="maquinaria">
+                          <input type="hidden" name="product_id" value="{{ $maquinaria->id }}">
+                          <input type="hidden" name="cantidad" value="1">
+                          <input type="hidden" name="dias_alquiler" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      @endif
+                    @endauth
+                  </div>
                 </div>
               </div>
             </div>
@@ -338,12 +401,20 @@
           <i class="fas fa-leaf"></i> Productos Orgánicos Destacados
         </h3>
         <div class="row">
-          @foreach($organicos->take(6) as $organico)
+          @foreach($organicos->take(3) as $organico)
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-leaf fa-4x text-success"></i>
-                </div>
+                @if($organico->imagenes && $organico->imagenes->count() > 0)
+                  <img src="{{ asset('storage/'.$organico->imagenes->first()->ruta) }}" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('{{ asset('storage/'.$organico->imagenes->first()->ruta) }}', '_blank')"
+                       alt="{{ $organico->nombre }}">
+                @else
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-leaf fa-4x text-success"></i>
+                  </div>
+                @endif
                 <div class="card-body">
                   <h5 class="card-title">{{ $organico->nombre }}</h5>
                   <p class="card-text text-muted small mb-2">
@@ -354,9 +425,24 @@
                   @endif
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="{{ route('organicos.show', $organico->id) }}" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="{{ route('organicos.show', $organico->id) }}" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    @auth
+                      @if($organico->precio && ($organico->stock ?? 0) > 0)
+                        <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                          @csrf
+                          <input type="hidden" name="product_type" value="organico">
+                          <input type="hidden" name="product_id" value="{{ $organico->id }}">
+                          <input type="hidden" name="cantidad" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      @endif
+                    @endauth
+                  </div>
                 </div>
               </div>
             </div>

@@ -10,7 +10,7 @@
             <button class="btn btn-sm btn-primary">Buscar</button>
         </form>
 
-        <a href="<?php echo e(route('tipo_animals.create')); ?>" class="btn btn-sm btn-success ml-2">Nuevo</a>
+        <a href="<?php echo e(route('admin.tipo_animals.create')); ?>" class="btn btn-sm btn-success ml-2">Nuevo</a>
     </div>
 
     <div class="card-body p-0">
@@ -34,8 +34,8 @@
                     <td><?php echo e($i->nombre); ?></td>
                     <td><?php echo e($i->descripcion); ?></td>
                     <td class="text-right pr-3">
-                        <a href="<?php echo e(route('tipo_animals.edit', $i)); ?>" class="btn btn-sm btn-primary">Editar</a>
-                        <form action="<?php echo e(route('tipo_animals.destroy', $i)); ?>" method="post" class="d-inline">
+                        <a href="<?php echo e(route('admin.tipo_animals.edit', $i)); ?>" class="btn btn-sm btn-primary">Editar</a>
+                        <form action="<?php echo e(route('admin.tipo_animals.destroy', $i)); ?>" method="post" class="d-inline">
                             <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                             <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?')">Eliminar</button>
                         </form>

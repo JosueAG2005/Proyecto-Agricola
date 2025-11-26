@@ -9,7 +9,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
 
-            <form action="{{ route('tipo-pesos.store') }}" method="POST">
+            <form action="{{ route('admin.tipo-pesos.store') }}" method="POST">
                 @csrf
 
                 <div class="mb-3">
@@ -26,7 +26,7 @@
                     <i class="fas fa-save"></i> Guardar
                 </button>
 
-                <a href="{{ route('tipo-pesos.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.tipo-pesos.index') }}" class="btn btn-secondary">
                     Cancelar
                 </a>
             </form>

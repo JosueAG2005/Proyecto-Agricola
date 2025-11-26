@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organico;
+use App\Models\OrganicoImagen;
 use App\Models\Categoria; // 👈 Agregamos el modelo de Categoría
 use App\Http\Requests\StoreOrganicoRequest;
 use App\Http\Requests\UpdateOrganicoRequest;
+use Illuminate\Support\Facades\Storage;
 
 class OrganicoController extends Controller
 {
@@ -26,7 +28,8 @@ class OrganicoController extends Controller
 public function create()
 {
     $categorias = \App\Models\Categoria::orderBy('nombre')->get();
-    return view('organicos.create', compact('categorias'));
+    $unidades = \App\Models\UnidadOrganico::orderBy('nombre')->get();
+    return view('organicos.create', compact('categorias', 'unidades'));
 }
 
 
@@ -35,12 +38,32 @@ public function create()
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id();
-        Organico::create($data);
+        
+        // Crear el orgánico
+        $organico = Organico::create($data);
+        
+        // Guardar las imágenes si existen (máximo 4)
+        if ($request->hasFile('imagenes')) {
+            $orden = 0;
+            $imagenes = array_slice($request->file('imagenes'), 0, 4); // Limitar a 4 imágenes
+            foreach ($imagenes as $imagen) {
+                if ($imagen && $imagen->isValid()) {
+                    $ruta = $imagen->store('organicos', 'public');
+                    OrganicoImagen::create([
+                        'organico_id' => $organico->id,
+                        'ruta' => $ruta,
+                        'orden' => $orden++,
+                    ]);
+                }
+            }
+        }
+        
         return redirect()->route('organicos.index')->with('ok', 'Orgánico creado');
     }
 
     public function show(Organico $organico)
     {
+        $organico->load(['categoria', 'unidad', 'user', 'imagenes']);
         return view('organicos.show', compact('organico'));
     }
 
@@ -52,8 +75,10 @@ public function create()
             ->with('error', 'No tienes permisos para editar este anuncio.');
     }
 
+    $organico->load('imagenes');
     $categorias = \App\Models\Categoria::orderBy('nombre')->get();
-    return view('organicos.edit', compact('organico', 'categorias'));
+    $unidades = \App\Models\UnidadOrganico::orderBy('nombre')->get();
+    return view('organicos.edit', compact('organico', 'categorias', 'unidades'));
 }
 
 
@@ -65,7 +90,44 @@ public function create()
                 ->with('error', 'No tienes permisos para editar este anuncio.');
         }
 
-        $organico->update($request->validated());
+        $data = $request->validated();
+        $organico->update($data);
+        
+        // Eliminar imágenes marcadas para eliminar
+        if ($request->has('imagenes_eliminar')) {
+            foreach ($request->imagenes_eliminar as $imagenId) {
+                $imagen = OrganicoImagen::find($imagenId);
+                if ($imagen && $imagen->organico_id === $organico->id) {
+                    if (Storage::disk('public')->exists($imagen->ruta)) {
+                        Storage::disk('public')->delete($imagen->ruta);
+                    }
+                    $imagen->delete();
+                }
+            }
+        }
+        
+        // Agregar nuevas imágenes
+        if ($request->hasFile('imagenes')) {
+            $totalImagenesActuales = $organico->imagenes()->count();
+            $maxOrden = $organico->imagenes()->max('orden') ?? -1;
+            $orden = $maxOrden + 1;
+            $espaciosDisponibles = 4 - $totalImagenesActuales;
+            
+            if ($espaciosDisponibles > 0) {
+                $imagenes = array_slice($request->file('imagenes'), 0, $espaciosDisponibles);
+                foreach ($imagenes as $imagen) {
+                    if ($imagen && $imagen->isValid()) {
+                        $ruta = $imagen->store('organicos', 'public');
+                        OrganicoImagen::create([
+                            'organico_id' => $organico->id,
+                            'ruta' => $ruta,
+                            'orden' => $orden++,
+                        ]);
+                    }
+                }
+            }
+        }
+        
         return redirect()->route('organicos.index')->with('ok', 'Orgánico actualizado');
     }
 
@@ -77,6 +139,13 @@ public function create()
                 ->with('error', 'No tienes permisos para eliminar este anuncio.');
         }
 
+        // Eliminar las imágenes físicas
+        foreach ($organico->imagenes as $imagen) {
+            if (Storage::disk('public')->exists($imagen->ruta)) {
+                Storage::disk('public')->delete($imagen->ruta);
+            }
+        }
+        
         $organico->delete();
         return redirect()->route('organicos.index')->with('ok', 'Orgánico eliminado');
     }

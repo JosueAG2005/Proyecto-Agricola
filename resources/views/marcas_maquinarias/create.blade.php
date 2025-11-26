@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        <form action="{{ route('marcas_maquinarias.store') }}" method="post">
+        <form action="{{ route('admin.marcas_maquinarias.store') }}" method="post">
             @csrf
 
             <div class="form-group">
@@ -57,7 +57,7 @@
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Guardar
                 </button>
-                <a href="{{ route('marcas_maquinarias.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.marcas_maquinarias.index') }}" class="btn btn-secondary">
                     <i class="fas fa-times"></i> Cancelar
                 </a>
             </div>

@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\TipoAnimal;
 use Illuminate\Http\Request;
-namespace App\Http\Controllers;
-use App\Models\TipoAnimal;
-use Illuminate\Http\Request;
 
 class TipoAnimalController extends Controller
 {
@@ -37,7 +34,7 @@ class TipoAnimalController extends Controller
 
         TipoAnimal::create($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('tipo_animals.index')->with('ok', 'Tipo de animal creado');
+        return redirect()->route('admin.tipo_animals.index')->with('ok', 'Tipo de animal creado');
     }
 
     public function edit(TipoAnimal $tipoAnimal)
@@ -54,13 +51,13 @@ class TipoAnimalController extends Controller
 
         $tipoAnimal->update($request->only('nombre', 'descripcion'));
 
-        return redirect()->route('tipo_animals.index')->with('ok', 'Tipo de animal actualizado');
+        return redirect()->route('admin.tipo_animals.index')->with('ok', 'Tipo de animal actualizado');
     }
 
     public function destroy(TipoAnimal $tipoAnimal)
     {
         $tipoAnimal->delete();
 
-        return redirect()->route('tipo_animals.index')->with('ok', 'Tipo de animal eliminado');
+        return redirect()->route('admin.tipo_animals.index')->with('ok', 'Tipo de animal eliminado');
     }
 }

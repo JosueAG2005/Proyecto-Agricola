@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Editar Registro de Ganado</h1>
-        <a href="{{ route('ganados.index') }}" class="btn btn-secondary">
+        <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('ganados.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
@@ -110,7 +110,18 @@
                     </select>
                 </div>
 
-               
+                {{-- DATOS SANITARIOS --}}
+                <div class="form-group mb-3">
+                    <label for="dato_sanitario_id">Datos Sanitarios</label>
+                    <select name="dato_sanitario_id" class="form-control">
+                        <option value="">Sin registro sanitario</option>
+                        @foreach($datosSanitarios as $ds)
+                            <option value="{{ $ds->id }}" {{ $ganado->dato_sanitario_id == $ds->id ? 'selected' : '' }}>
+                                {{ $ds->vacuna ?? 'Sin vacuna' }} - {{ $ds->fecha_aplicacion ?? 'Sin fecha' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 {{-- FECHA PUBLICACION --}}
                 <div class="form-group mb-3">

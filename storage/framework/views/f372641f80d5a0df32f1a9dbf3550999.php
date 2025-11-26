@@ -5,7 +5,7 @@
     <div class="card-header">Nuevo Tipo de Animal</div>
 
     <div class="card-body">
-        <form action="<?php echo e(route('tipo_animals.store')); ?>" method="post">
+            <form action="<?php echo e(route('admin.tipo_animals.store')); ?>" method="post">
             <?php echo csrf_field(); ?>
 
             <div class="form-group">
@@ -19,7 +19,7 @@
             </div>
 
             <button class="btn btn-success">Guardar</button>
-            <a href="<?php echo e(route('tipo_animals.index')); ?>" class="btn btn-secondary">Cancelar</a>
+            <a href="<?php echo e(route('admin.tipo_animals.index')); ?>" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

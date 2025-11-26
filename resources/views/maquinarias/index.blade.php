@@ -59,10 +59,11 @@
             <td>{{ $m->marcaMaquinaria->nombre ?? '—' }}</td>
             <td>{{ number_format($m->precio_dia,2) }}</td>
             <td>
-              @php
-                $map = ['disponible'=>'success','en_mantenimiento'=>'secondary','vendido'=>'danger'];
-              @endphp
-              <span class="badge badge-{{ $map[$m->estado] ?? 'light' }}">{{ str_replace('_',' ',$m->estado) }}</span>
+              @if($m->estadoMaquinaria)
+                <span class="badge badge-info">{{ $m->estadoMaquinaria->nombre }}</span>
+              @else
+                <span class="badge badge-secondary">—</span>
+              @endif
             </td>
             <td class="text-right pr-3">
               @if(auth()->check() && (auth()->user()->isVendedor() || auth()->user()->isAdmin()))

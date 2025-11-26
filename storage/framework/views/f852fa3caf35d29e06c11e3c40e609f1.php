@@ -124,9 +124,17 @@
           <?php $__currentLoopData = $maquinarias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $maquinaria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-tractor fa-4x text-success"></i>
-                </div>
+                <?php if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0): ?>
+                  <img src="<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>', '_blank')"
+                       alt="<?php echo e($maquinaria->nombre); ?>">
+                <?php else: ?>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-tractor fa-4x text-success"></i>
+                  </div>
+                <?php endif; ?>
                 <div class="card-body">
                   <h5 class="card-title"><?php echo e($maquinaria->nombre); ?></h5>
                   <p class="card-text text-muted small mb-2">
@@ -173,17 +181,31 @@
           <?php $__currentLoopData = $organicos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $organico): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-leaf fa-4x text-success"></i>
-                </div>
+                <?php if($organico->imagenes && $organico->imagenes->count() > 0): ?>
+                  <img src="<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>', '_blank')"
+                       alt="<?php echo e($organico->nombre); ?>">
+                <?php else: ?>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-leaf fa-4x text-success"></i>
+                  </div>
+                <?php endif; ?>
                 <div class="card-body">
                   <h5 class="card-title"><?php echo e($organico->nombre); ?></h5>
                   <p class="card-text text-muted small mb-2">
                     <i class="fas fa-tag"></i> <?php echo e($organico->categoria->nombre ?? 'Sin categoría'); ?>
 
+                    <?php if($organico->unidad): ?>
+                      | <i class="fas fa-balance-scale"></i> <?php echo e($organico->unidad->nombre); ?>
+
+                    <?php endif; ?>
                   </p>
                   <div class="mb-2">
-                    <span class="badge badge-success">Stock: <?php echo e($organico->stock ?? 0); ?></span>
+                    <?php if($organico->stock): ?>
+                      <span class="badge badge-info">Stock: <?php echo e($organico->stock); ?></span>
+                    <?php endif; ?>
                   </div>
                   <?php if($organico->precio): ?>
                     <p class="h5 text-success mb-0">Bs <?php echo e(number_format($organico->precio, 2)); ?></p>
@@ -233,16 +255,19 @@
           Encuentra anuncios de productos y servicios especializados y a sus proveedores directos.
         </p>
         <div class="d-flex flex-column flex-md-row gap-3">
-          <a href="<?php echo e(route('ads.index')); ?>" class="btn btn-success btn-lg px-5">
-            <i class="fas fa-search"></i> Navega
+          <a href="<?php echo e(route('ads.index')); ?>" class="btn btn-success btn-lg px-5 shadow-sm">
+            <i class="fas fa-search"></i> Navegar Anuncios
           </a>
           <?php if(auth()->guard()->check()): ?>
             <?php if(auth()->user()->isCliente()): ?>
-              <a href="<?php echo e(route('solicitar-vendedor')); ?>" class="btn btn-primary btn-lg px-5">
+              <a href="<?php echo e(route('solicitar-vendedor')); ?>" class="btn btn-primary btn-lg px-5 shadow-sm">
                 <i class="fas fa-user-tie"></i> Ser Vendedor
               </a>
             <?php endif; ?>
           <?php else: ?>
+            <a href="<?php echo e(route('solicitar-vendedor')); ?>" class="btn btn-primary btn-lg px-5 shadow-sm">
+              <i class="fas fa-user-tie"></i> Ser Vendedor
+            </a>
             <a href="<?php echo e(route('login')); ?>" class="btn btn-outline-primary btn-lg px-5">
               <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
             </a>
@@ -258,7 +283,7 @@
           <i class="fas fa-cow"></i> Animales Destacados
         </h3>
         <div class="row">
-          <?php $__currentLoopData = $ganados->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ganado): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <?php $__currentLoopData = $ganados->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ganado): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
                 <?php if($ganado->imagen): ?>
@@ -286,9 +311,24 @@
                   <?php endif; ?>
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="<?php echo e(route('ganados.show', $ganado->id)); ?>" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="<?php echo e(route('ganados.show', $ganado->id)); ?>" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    <?php if(auth()->guard()->check()): ?>
+                      <?php if($ganado->precio && ($ganado->stock ?? 0) > 0): ?>
+                        <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline">
+                          <?php echo csrf_field(); ?>
+                          <input type="hidden" name="product_type" value="ganado">
+                          <input type="hidden" name="product_id" value="<?php echo e($ganado->id); ?>">
+                          <input type="hidden" name="cantidad" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      <?php endif; ?>
+                    <?php endif; ?>
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,12 +348,20 @@
           <i class="fas fa-tractor"></i> Maquinaria Destacada
         </h3>
         <div class="row">
-          <?php $__currentLoopData = $maquinarias->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $maquinaria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <?php $__currentLoopData = $maquinarias->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $maquinaria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-tractor fa-4x text-success"></i>
-                </div>
+                <?php if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0): ?>
+                  <img src="<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>', '_blank')"
+                       alt="<?php echo e($maquinaria->nombre); ?>">
+                <?php else: ?>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-tractor fa-4x text-success"></i>
+                  </div>
+                <?php endif; ?>
                 <div class="card-body">
                   <h5 class="card-title"><?php echo e($maquinaria->nombre); ?></h5>
                   <p class="card-text text-muted small mb-2">
@@ -325,9 +373,25 @@
                   <?php endif; ?>
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    <?php if(auth()->guard()->check()): ?>
+                      <?php if($maquinaria->precio_dia): ?>
+                        <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline">
+                          <?php echo csrf_field(); ?>
+                          <input type="hidden" name="product_type" value="maquinaria">
+                          <input type="hidden" name="product_id" value="<?php echo e($maquinaria->id); ?>">
+                          <input type="hidden" name="cantidad" value="1">
+                          <input type="hidden" name="dias_alquiler" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      <?php endif; ?>
+                    <?php endif; ?>
+                  </div>
                 </div>
               </div>
             </div>
@@ -347,12 +411,20 @@
           <i class="fas fa-leaf"></i> Productos Orgánicos Destacados
         </h3>
         <div class="row">
-          <?php $__currentLoopData = $organicos->take(6); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $organico): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <?php $__currentLoopData = $organicos->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $organico): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="card h-100 shadow-sm rounded-lg border-0">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                  <i class="fas fa-leaf fa-4x text-success"></i>
-                </div>
+                <?php if($organico->imagenes && $organico->imagenes->count() > 0): ?>
+                  <img src="<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>" 
+                       class="card-img-top" 
+                       style="height:200px; object-fit:cover; cursor:pointer;"
+                       onclick="window.open('<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>', '_blank')"
+                       alt="<?php echo e($organico->nombre); ?>">
+                <?php else: ?>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-leaf fa-4x text-success"></i>
+                  </div>
+                <?php endif; ?>
                 <div class="card-body">
                   <h5 class="card-title"><?php echo e($organico->nombre); ?></h5>
                   <p class="card-text text-muted small mb-2">
@@ -364,9 +436,24 @@
                   <?php endif; ?>
                 </div>
                 <div class="card-footer bg-white border-top">
-                  <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
+                  <div class="d-flex gap-2">
+                    <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="btn btn-outline-success btn-sm flex-fill">
+                      <i class="fas fa-eye"></i> Ver
+                    </a>
+                    <?php if(auth()->guard()->check()): ?>
+                      <?php if($organico->precio && ($organico->stock ?? 0) > 0): ?>
+                        <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline">
+                          <?php echo csrf_field(); ?>
+                          <input type="hidden" name="product_type" value="organico">
+                          <input type="hidden" name="product_id" value="<?php echo e($organico->id); ?>">
+                          <input type="hidden" name="cantidad" value="1">
+                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
+                            <i class="fas fa-cart-plus"></i>
+                          </button>
+                        </form>
+                      <?php endif; ?>
+                    <?php endif; ?>
+                  </div>
                 </div>
               </div>
             </div>

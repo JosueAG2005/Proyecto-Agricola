@@ -13,7 +13,7 @@
             <button class="btn btn-sm btn-primary">Buscar</button>
         </form>
 
-        <a href="{{ route('marcas_maquinarias.create') }}" class="btn btn-sm btn-success ml-2">
+        <a href="{{ route('admin.marcas_maquinarias.create') }}" class="btn btn-sm btn-success ml-2">
             <i class="fas fa-plus"></i> Nuevo
         </a>
     </div>
@@ -53,10 +53,10 @@
                     <td><strong>{{ $item->nombre }}</strong></td>
                     <td>{{ $item->descripcion ?? '—' }}</td>
                     <td class="text-right pr-3">
-                        <a href="{{ route('marcas_maquinarias.edit', $item) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.marcas_maquinarias.edit', $item) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <form action="{{ route('marcas_maquinarias.destroy', $item) }}" method="post" class="d-inline">
+                        <form action="{{ route('admin.marcas_maquinarias.destroy', $item) }}" method="post" class="d-inline">
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar esta marca de maquinaria?')">
                                 <i class="fas fa-trash"></i> Eliminar

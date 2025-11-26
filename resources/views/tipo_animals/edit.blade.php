@@ -5,7 +5,7 @@
     <div class="card-header">Editar Tipo de Animal</div>
 
     <div class="card-body">
-        <form action="{{ route('tipo_animals.update', $tipoAnimal) }}" method="post">
+            <form action="{{ route('admin.tipo_animals.update', $tipoAnimal) }}" method="post">
             @csrf @method('PUT')
 
             <div class="form-group">
@@ -19,7 +19,7 @@
             </div>
 
             <button class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('tipo_animals.index') }}" class="btn btn-secondary">Cancelar</a>
+            <a href="{{ route('admin.tipo_animals.index') }}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>
