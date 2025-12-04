@@ -11,6 +11,7 @@ use App\Models\GanadoImagen;
 use App\Services\GeocodificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class GanadoController extends Controller
 {
@@ -278,30 +279,65 @@ class GanadoController extends Controller
      * Obtiene información geográfica desde coordenadas (API)
      */
     public function obtenerGeocodificacion(Request $request)
-    {
-        $request->validate([
-            'latitud' => 'required|numeric',
-            'longitud' => 'required|numeric',
-        ]);
+{
+    $request->validate([
+        'latitud'  => 'required|numeric',
+        'longitud' => 'required|numeric',
+    ]);
 
-        $geocodificacionService = new GeocodificacionService();
-        $infoGeografica = $geocodificacionService->obtenerInformacionGeografica(
-            (float) $request->latitud,
-            (float) $request->longitud
-        );
+    $lat = $request->latitud;
+    $lng = $request->longitud;
 
-        if ($infoGeografica) {
-            return response()->json([
-                'success' => true,
-                'data' => $infoGeografica
+    try {
+        $response = Http::withoutVerifying()   // evita problemas SSL en local
+            ->timeout(10)                     // evita demoras
+            ->withHeaders([
+                'User-Agent' => 'ProyectoAgricola/1.0',
+            ])->get('https://nominatim.openstreetmap.org/reverse', [
+                'lat'            => $lat,
+                'lon'            => $lng,
+                'format'         => 'json',
+                'addressdetails' => 1,
             ]);
-        }
-
+    } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'No se pudo obtener la información geográfica'
-        ], 404);
+            'message' => 'Error al conectar con Nominatim: '.$e->getMessage(),
+        ], 500);
     }
+
+    if ($response->failed()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error en la respuesta de Nominatim. Código: '.$response->status(),
+            'body'    => $response->body(),
+        ], 500);
+    }
+
+    $json    = $response->json();
+    $address = $json['address'] ?? [];
+
+    $departamento = $address['state'] ?? null;
+    $provincia    = $address['county'] ?? null;
+    $municipio    = $address['municipality']
+                    ?? $address['town']
+                    ?? $address['village']
+                    ?? null;
+    $ciudad       = $address['city']
+                    ?? $address['town']
+                    ?? $address['village']
+                    ?? $municipio;
+
+    return response()->json([
+        'success' => true,
+        'data'    => [
+            'departamento' => $departamento,
+            'provincia'    => $provincia,
+            'municipio'    => $municipio,
+            'ciudad'       => $ciudad,
+        ],
+    ]);
+}
 
     /**
      * Elimina un registro.

@@ -117,7 +117,7 @@
 <div class="card card-outline card-success shadow-sm mb-4">
     <div class="card-header">
         <h3 class="card-title mb-0">
-            <i class="fas fa-align-left mr-2"></i>Descripción y origen
+            <i class="fas fa-map-marker-alt mr-2"></i>Descripción y origen del producto
         </h3>
     </div>
 
@@ -140,26 +140,75 @@
 
             
             <div class="col-md-7 mt-3 mt-md-0">
-                <div class="form-group mb-0">
-                    <label class="mb-1">Origen / Procedencia</label>
-                    <input type="text"
-                           id="origen"
-                           name="origen"
-                           class="form-control mb-2"
-                           value="<?php echo e(old('origen', $organico->origen ?? '')); ?>"
-                           readonly>
-                    <small class="form-text text-muted mb-2">
-                        Haz clic en el mapa para seleccionar el lugar donde se cosechó.
-                    </small>
+                <h6 class="text-muted text-uppercase mb-2">
+                    <i class="fas fa-map-marked-alt mr-1"></i> Origen del producto
+                </h6>
 
+                <div class="form-group mb-2">
+                    <label class="mb-1">Ubicación (seleccione en el mapa)</label>
                     <div id="map-origen"
                          style="height: 320px; border-radius: 8px; border: 1px solid #e0e0e0;"></div>
-
-                    <input type="hidden" name="latitud_origen" id="latitud_origen"
-                           value="<?php echo e(old('latitud_origen', $organico->latitud_origen ?? '')); ?>">
-                    <input type="hidden" name="longitud_origen" id="longitud_origen"
-                           value="<?php echo e(old('longitud_origen', $organico->longitud_origen ?? '')); ?>">
                 </div>
+
+                
+                <input type="text"
+                       id="origen"
+                       name="origen"
+                       class="form-control mb-3"
+                       value="<?php echo e(old('origen', $organico->origen ?? '')); ?>"
+                       readonly>
+
+                
+                <div id="info-origen"
+                     class="mt-1"
+                     style="display: <?php echo e((isset($organico) && ($organico->origen ?? false)) ? 'block' : 'none'); ?>;">
+                    <div class="card border">
+                        <div class="card-body py-3">
+                            <h6 class="mb-3 text-muted text-uppercase">
+                                <i class="fas fa-map mr-1"></i> Detalle de ubicación
+                            </h6>
+
+                            <div class="row mb-2">
+                                <div class="col-md-3">
+                                    <strong>Ciudad:</strong>
+                                </div>
+                                <div class="col-md-9" id="ciudad-origen-texto">
+                                    <?php echo e(isset($organico) ? ($organico->ciudad_origen ?? '-') : '-'); ?>
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Dirección:</strong>
+                                </div>
+                                <div class="col-md-9" id="direccion-origen-texto">
+                                    <?php if(isset($organico) && ($organico->origen ?? false)): ?>
+                                        <?php echo e($organico->origen); ?>
+
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <input type="hidden" name="latitud_origen" id="latitud_origen"
+                       value="<?php echo e(old('latitud_origen', $organico->latitud_origen ?? '')); ?>">
+                <input type="hidden" name="longitud_origen" id="longitud_origen"
+                       value="<?php echo e(old('longitud_origen', $organico->longitud_origen ?? '')); ?>">
+
+                <input type="hidden" name="departamento_origen" id="departamento_origen"
+                       value="<?php echo e(old('departamento_origen', $organico->departamento_origen ?? '')); ?>">
+                <input type="hidden" name="municipio_origen" id="municipio_origen"
+                       value="<?php echo e(old('municipio_origen', $organico->municipio_origen ?? '')); ?>">
+                <input type="hidden" name="provincia_origen" id="provincia_origen"
+                       value="<?php echo e(old('provincia_origen', $organico->provincia_origen ?? '')); ?>">
+                <input type="hidden" name="ciudad_origen" id="ciudad_origen"
+                       value="<?php echo e(old('ciudad_origen', $organico->ciudad_origen ?? '')); ?>">
             </div>
         </div>
     </div>
@@ -268,8 +317,64 @@
 
         document.getElementById('latitud_origen').value = lat;
         document.getElementById('longitud_origen').value = lng;
+
+        // Valor provisional mientras llega la geocodificación
         document.getElementById('origen').value = "Lat: " + lat + " - Lng: " + lng;
+
+        obtenerInformacionOrigen(lat, lng);
     });
+
+    // Función similar a la de MAQUINARIA
+    function obtenerInformacionOrigen(lat, lng) {
+        const infoContainer   = document.getElementById('info-origen');
+        const ciudadTexto     = document.getElementById('ciudad-origen-texto');
+        const direccionTexto  = document.getElementById('direccion-origen-texto');
+
+        if (!infoContainer) return;
+
+        infoContainer.style.display = 'block';
+        ciudadTexto.textContent    = 'Cargando...';
+        direccionTexto.textContent = 'Cargando...';
+
+        fetch('/api/geocodificacion?latitud=' + lat + '&longitud=' + lng)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    var info = data.data;
+
+                    // Guardar en campos ocultos
+                    document.getElementById('departamento_origen').value = info.departamento || '';
+                    document.getElementById('municipio_origen').value    = info.municipio || '';
+                    document.getElementById('provincia_origen').value    = info.provincia || '';
+                    document.getElementById('ciudad_origen').value       = info.ciudad || '';
+
+                    // Mostrar en interfaz
+                    ciudadTexto.textContent = info.ciudad || info.municipio || 'No disponible';
+
+                    var direccion = [];
+                    if (info.municipio)   direccion.push(info.municipio);
+                    if (info.provincia)   direccion.push('Provincia ' + info.provincia);
+                    if (info.departamento)direccion.push(info.departamento);
+                    direccion.push('Bolivia');
+
+                    var direccionCompleta = direccion.join(', ');
+                    direccionTexto.textContent = direccionCompleta || 'No disponible';
+
+                    // Actualizar campo origen con la dirección bonita
+                    if (direccionCompleta) {
+                        document.getElementById('origen').value = direccionCompleta;
+                    }
+                } else {
+                    ciudadTexto.textContent    = 'No disponible';
+                    direccionTexto.textContent = 'No disponible';
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener información geográfica:', error);
+                ciudadTexto.textContent    = 'Error';
+                direccionTexto.textContent = 'Error';
+            });
+    }
 </script>
 
 <script>
