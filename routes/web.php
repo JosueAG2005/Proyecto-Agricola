@@ -24,7 +24,7 @@ Route::middleware('guest')->group(function () {
     // Login
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-    
+
     // Registro
     Route::get('/registro', [RegisterController::class, 'showRegisterForm'])->name('register');
     Route::post('/registro', [RegisterController::class, 'register'])->name('register.post');
@@ -55,7 +55,7 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/solicitudes-vendedor/{solicitudVendedor}', [SolicitudVendedorController::class, 'show'])->name('solicitudes-vendedor.show');
     Route::post('/solicitudes-vendedor/{id}/aprobar', [SolicitudVendedorController::class, 'aprobar'])->name('solicitudes-vendedor.aprobar');
     Route::post('/solicitudes-vendedor/{id}/rechazar', [SolicitudVendedorController::class, 'rechazar'])->name('solicitudes-vendedor.rechazar');
-    
+
     // Parámetros del sistema (solo ADMIN)
     Route::resource('categorias', App\Http\Controllers\CategoriaController::class);
     Route::resource('tipo_animals', TipoAnimalController::class);
@@ -66,10 +66,10 @@ Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('estado_maquinarias', EstadoMaquinariaController::class);
     Route::resource('unidades_organicos', App\Http\Controllers\UnidadOrganicoController::class);
 
+
     Route::get('/pedidos', [AdminPedidoController::class, 'index'])->name('pedidos.index');
     Route::get('/pedidos/{pedido}', [AdminPedidoController::class, 'show'])->name('pedidos.show');
     Route::put('/pedidos/{pedido}/estado', [AdminPedidoController::class, 'updateEstado'])->name('pedidos.updateEstado');
-
 });
 
 // ===== VENDEDOR Y ADMINISTRADOR =====
@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('maquinarias/{maquinaria}', [MaquinariaController::class, 'show'])->name('maquinarias.show');
     Route::get('organicos', [OrganicoController::class, 'index'])->name('organicos.index');
     Route::get('organicos/{organico}', [OrganicoController::class, 'show'])->name('organicos.show');
-    
+
     // Carrito de compras
     Route::get('carrito', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('carrito/agregar', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
@@ -104,15 +104,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('carrito/{cartItem}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
     Route::delete('carrito', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
     Route::get('carrito/count', [App\Http\Controllers\CartController::class, 'getCount'])->name('cart.count');
-    
+
     // API para obtener información geográfica desde coordenadas
     Route::get('/api/geocodificacion', [GanadoController::class, 'obtenerGeocodificacion'])->name('api.geocodificacion');
 
-        // Pedidos (historial del usuario)
+    // Pedidos (historial del usuario)
     Route::get('/mis-pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
     Route::get('/mis-pedidos/{pedido}', [PedidoController::class, 'show'])->name('pedidos.show');
     Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store');
-
 });
 
 // ===== CLIENTE =====

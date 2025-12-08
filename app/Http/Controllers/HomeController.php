@@ -7,8 +7,13 @@ use App\Models\Maquinaria;
 use App\Models\Organico;
 use App\Models\Categoria;
 use App\Models\TipoAnimal;
+use App\Models\TipoMaquinaria;
+use App\Models\MarcaMaquinaria;
+use App\Models\TipoCultivo;
 use App\Models\Raza;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
 
 class HomeController extends Controller
 {
@@ -20,79 +25,83 @@ class HomeController extends Controller
         $categorias = Categoria::orderBy('nombre')->get();
         $tiposAnimales = TipoAnimal::orderBy('nombre')->get();
         $razas = Raza::orderBy('nombre')->get();
-        
+
+        $tiposMaquinaria   = TipoMaquinaria::orderBy('nombre')->get();
+        $marcasMaquinaria  = MarcaMaquinaria::orderBy('nombre')->get();
+        $tiposCultivo      = TipoCultivo::orderBy('nombre')->get();
+
         // Parámetros de búsqueda
         $q = $request->get('q', '');
         $categoria_id = $request->get('categoria_id', '');
         $tipo_animal_id = $request->get('tipo_animal_id', '');
         $raza_id = $request->get('raza_id', '');
         $tipo = $request->get('tipo', ''); // ganados, maquinarias, organicos
-        
+
         // Inicializar resultados
         $ganados = collect();
         $maquinarias = collect();
         $organicos = collect();
-        
+
         // Si hay búsqueda o filtros, buscar (siempre mostrar todos los tipos)
         if ($q || $categoria_id || $tipo_animal_id || $raza_id) {
             // Búsqueda en Ganados (siempre mostrar)
             $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario', 'imagenes'])
-                ->where(function($query) use ($q) {
+                ->where(function ($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
-                              ->orWhere('descripcion', 'ilike', "%{$q}%")
-                              ->orWhere('ubicacion', 'ilike', "%{$q}%");
+                            ->orWhere('descripcion', 'ilike', "%{$q}%")
+                            ->orWhere('ubicacion', 'ilike', "%{$q}%");
                     }
                 });
-            
+
             if ($categoria_id) {
                 $ganadosQuery->where('categoria_id', $categoria_id);
             }
-            
+
             if ($tipo_animal_id) {
                 $ganadosQuery->where('tipo_animal_id', $tipo_animal_id);
             }
-            
+
             if ($raza_id) {
                 $ganadosQuery->where('raza_id', $raza_id);
             }
-            
+
             $ganados = $ganadosQuery->orderBy('created_at', 'desc')->paginate(12);
-            
+
             // Búsqueda en Maquinarias (siempre mostrar)
             $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
-                ->where(function($query) use ($q) {
+                ->where(function ($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
-                              ->orWhere('descripcion', 'ilike', "%{$q}%")
-                              ->orWhereHas('tipoMaquinaria', function($subQuery) use ($q) {
-                                  $subQuery->where('nombre', 'ilike', "%{$q}%");
-                              })
-                              ->orWhereHas('marcaMaquinaria', function($subQuery) use ($q) {
-                                  $subQuery->where('nombre', 'ilike', "%{$q}%");
-                              });
+                            ->orWhere('descripcion', 'ilike', "%{$q}%")
+                            ->orWhereHas('tipoMaquinaria', function ($subQuery) use ($q) {
+                                $subQuery->where('nombre', 'ilike', "%{$q}%");
+                            })
+                            ->orWhereHas('marcaMaquinaria', function ($subQuery) use ($q) {
+                                $subQuery->where('nombre', 'ilike', "%{$q}%");
+                            });
                     }
                 });
-            
+
             if ($categoria_id) {
                 $maquinariasQuery->where('categoria_id', $categoria_id);
             }
-            
+
             $maquinarias = $maquinariasQuery->orderBy('created_at', 'desc')->paginate(12);
-            
+
             // Búsqueda en Orgánicos (siempre mostrar)
             $organicosQuery = Organico::with(['categoria', 'imagenes', 'unidad'])
-                ->where(function($query) use ($q) {
+                ->where(function ($query) use ($q) {
                     if ($q) {
                         $query->where('nombre', 'ilike', "%{$q}%")
-                              ->orWhere('descripcion', 'ilike', "%{$q}%");
+                            ->orWhere('descripcion', 'ilike', "%{$q}%");
                     }
                 });
-            
+
             if ($categoria_id) {
                 $organicosQuery->where('categoria_id', $categoria_id);
             }
-            
+
             $organicos = $organicosQuery->orderBy('created_at', 'desc')->paginate(12);
         } else {
             // Sin búsqueda: mostrar productos destacados/recientes (últimos 3 de cada tipo)
@@ -100,22 +109,25 @@ class HomeController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->take(3)
                 ->get();
-            
+
             $maquinarias = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
                 ->orderBy('created_at', 'desc')
                 ->take(3)
                 ->get();
-            
+
             $organicos = Organico::with(['categoria', 'imagenes', 'unidad'])
                 ->orderBy('created_at', 'desc')
                 ->take(3)
                 ->get();
         }
-        
+
         return view('public.home', compact(
             'categorias',
             'tiposAnimales',
             'razas',
+            'tiposMaquinaria',
+            'marcasMaquinaria',
+            'tiposCultivo',
             'ganados',
             'maquinarias',
             'organicos',
@@ -132,78 +144,110 @@ class HomeController extends Controller
      */
     public function anuncios(Request $request)
     {
-        $categorias = Categoria::orderBy('nombre')->get();
-        
+        $categorias   = Categoria::orderBy('nombre')->get();
+
         // Parámetros de búsqueda
-        $q = $request->get('q', '');
+        $q            = $request->get('q', '');
         $categoria_id = $request->get('categoria_id', '');
-        $tipo = $request->get('tipo', ''); // ganados, maquinarias, organicos
-        
-        // Inicializar resultados con paginación
-        $ganados = collect();
-        $maquinarias = collect();
-        $organicos = collect();
-        
-        // Búsqueda en Ganados (siempre mostrar, sin filtro de tipo)
-        $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario', 'imagenes'])
-            ->where(function($query) use ($q) {
-                if ($q) {
-                    $query->where('nombre', 'ilike', "%{$q}%")
-                          ->orWhere('descripcion', 'ilike', "%{$q}%")
-                          ->orWhere('ubicacion', 'ilike', "%{$q}%");
-                }
-            });
-        
+
+        // Determinar tipo seleccionado a partir del nombre de la categoría
+        $tipoSeleccionado = null; // 'ganados', 'maquinarias', 'organicos'
+
         if ($categoria_id) {
-            $ganadosQuery->where('categoria_id', $categoria_id);
-        }
-        
-        $ganados = $ganadosQuery->orderBy('created_at', 'desc')->paginate(12, ['*'], 'ganados_page');
-        
-        // Búsqueda en Maquinarias (siempre mostrar, sin filtro de tipo)
-        $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
-            ->where(function($query) use ($q) {
-                if ($q) {
-                    $query->where('nombre', 'ilike', "%{$q}%")
-                          ->orWhere('descripcion', 'ilike', "%{$q}%")
-                          ->orWhereHas('tipoMaquinaria', function($subQuery) use ($q) {
-                              $subQuery->where('nombre', 'ilike', "%{$q}%");
-                          })
-                          ->orWhereHas('marcaMaquinaria', function($subQuery) use ($q) {
-                              $subQuery->where('nombre', 'ilike', "%{$q}%");
-                          });
+            $cat = $categorias->firstWhere('id', (int) $categoria_id);
+
+            if ($cat) {
+                $nombre = Str::lower($cat->nombre);
+
+                if (Str::contains($nombre, 'animal')) {
+                    $tipoSeleccionado = 'ganados';
+                } elseif (Str::contains($nombre, 'maquinaria')) {
+                    $tipoSeleccionado = 'maquinarias';
+                } elseif (Str::contains($nombre, ['organico', 'orgánico'])) {
+                    $tipoSeleccionado = 'organicos';
                 }
-            });
-        
-        if ($categoria_id) {
-            $maquinariasQuery->where('categoria_id', $categoria_id);
+            }
         }
-        
-        $maquinarias = $maquinariasQuery->orderBy('created_at', 'desc')->paginate(12, ['*'], 'maquinarias_page');
-        
-        // Búsqueda en Orgánicos (siempre mostrar, sin filtro de tipo)
-        $organicosQuery = Organico::with(['categoria', 'imagenes', 'unidad'])
-            ->where(function($query) use ($q) {
-                if ($q) {
-                    $query->where('nombre', 'ilike', "%{$q}%")
-                          ->orWhere('descripcion', 'ilike', "%{$q}%");
-                }
-            });
-        
-        if ($categoria_id) {
-            $organicosQuery->where('categoria_id', $categoria_id);
+
+        // ================= GANADOS =================
+        if (!$tipoSeleccionado || $tipoSeleccionado === 'ganados') {
+            $ganadosQuery = Ganado::with(['categoria', 'tipoAnimal', 'raza', 'datoSanitario', 'imagenes'])
+                ->where(function ($query) use ($q) {
+                    if ($q) {
+                        $query->where('nombre', 'ilike', "%{$q}%")
+                            ->orWhere('descripcion', 'ilike', "%{$q}%")
+                            ->orWhere('ubicacion', 'ilike', "%{$q}%");
+                    }
+                });
+
+            // (Opcional) si igual quieres usar categoria_id para subcategorías:
+            // if ($categoria_id) {
+            //     $ganadosQuery->where('categoria_id', $categoria_id);
+            // }
+
+            $ganados = $ganadosQuery
+                ->orderBy('created_at', 'desc')
+                ->paginate(12, ['*'], 'ganados_page');
+        } else {
+            // No se deben mostrar Ganados
+            $ganados = collect();
         }
-        
-        $organicos = $organicosQuery->orderBy('created_at', 'desc')->paginate(12, ['*'], 'organicos_page');
-        
+
+        // ================= MAQUINARIAS =================
+        if (!$tipoSeleccionado || $tipoSeleccionado === 'maquinarias') {
+            $maquinariasQuery = Maquinaria::with(['categoria', 'tipoMaquinaria', 'marcaMaquinaria', 'imagenes'])
+                ->where(function ($query) use ($q) {
+                    if ($q) {
+                        $query->where('nombre', 'ilike', "%{$q}%")
+                            ->orWhere('descripcion', 'ilike', "%{$q}%")
+                            ->orWhereHas('tipoMaquinaria', function ($subQuery) use ($q) {
+                                $subQuery->where('nombre', 'ilike', "%{$q}%");
+                            })
+                            ->orWhereHas('marcaMaquinaria', function ($subQuery) use ($q) {
+                                $subQuery->where('nombre', 'ilike', "%{$q}%");
+                            });
+                    }
+                });
+
+            // if ($categoria_id) {
+            //     $maquinariasQuery->where('categoria_id', $categoria_id);
+            // }
+
+            $maquinarias = $maquinariasQuery
+                ->orderBy('created_at', 'desc')
+                ->paginate(12, ['*'], 'maquinarias_page');
+        } else {
+            $maquinarias = collect();
+        }
+
+        // ================= ORGÁNICOS =================
+        if (!$tipoSeleccionado || $tipoSeleccionado === 'organicos') {
+            $organicosQuery = Organico::with(['categoria', 'imagenes', 'unidad'])
+                ->where(function ($query) use ($q) {
+                    if ($q) {
+                        $query->where('nombre', 'ilike', "%{$q}%")
+                            ->orWhere('descripcion', 'ilike', "%{$q}%");
+                    }
+                });
+
+            // if ($categoria_id) {
+            //     $organicosQuery->where('categoria_id', $categoria_id);
+            // }
+
+            $organicos = $organicosQuery
+                ->orderBy('created_at', 'desc')
+                ->paginate(12, ['*'], 'organicos_page');
+        } else {
+            $organicos = collect();
+        }
+
         return view('public.ads.index', compact(
             'categorias',
             'ganados',
             'maquinarias',
             'organicos',
             'q',
-            'categoria_id',
-            'tipo'
+            'categoria_id'
         ));
     }
 }

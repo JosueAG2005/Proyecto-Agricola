@@ -13,9 +13,11 @@ class MarcaMaquinariaController extends Controller
     public function index()
     {
         $q = request('q');
-        $items = MarcaMaquinaria::when($q, fn($qb) =>
-                $qb->where('nombre', 'ilike', "%$q%")
-            )
+        $items = MarcaMaquinaria::when(
+            $q,
+            fn($qb) =>
+            $qb->where('nombre', 'ilike', "%$q%")
+        )
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();

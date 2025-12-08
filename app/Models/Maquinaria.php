@@ -7,25 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 class Maquinaria extends Model
 {
     protected $fillable = [
-    'nombre',
-    'user_id',
-    'tipo_maquinaria_id',
-    'marca_maquinaria_id',
-    'modelo',
-    'telefono',
-    'precio_dia',
-    'estado',
-    'estado_maquinaria_id',
-    'descripcion',
-    'categoria_id',
-    'ubicacion',
-    'departamento',
-    'municipio',
-    'provincia',
-    'ciudad',
-    'latitud',
-    'longitud',
-];
+        'nombre',
+        'user_id',
+        'tipo_maquinaria_id',
+        'marca_maquinaria_id',
+        'modelo',
+        'telefono',
+        'precio_dia',
+        'estado',
+        'estado_maquinaria_id',
+        'descripcion',
+        'categoria_id',
+        'ubicacion',
+        'departamento',
+        'municipio',
+        'provincia',
+        'ciudad',
+        'latitud',
+        'longitud',
+    ];
 
     /**
      * Relación: una maquinaria pertenece a una categoría
@@ -75,4 +75,3 @@ class Maquinaria extends Model
         return $this->hasMany(MaquinariaImagen::class)->orderBy('orden');
     }
 }
-

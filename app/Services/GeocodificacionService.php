@@ -20,11 +20,11 @@ class GeocodificacionService
         try {
             $url = 'https://nominatim.openstreetmap.org/reverse';
 
-            $response = Http::withoutVerifying()          
-                ->timeout(10)                             
+            $response = Http::withoutVerifying()
+                ->timeout(10)
                 ->withHeaders([
-                    'User-Agent'       => 'ProyectoAgricola/1.0', 
-                    'Accept-Language'  => 'es',                  
+                    'User-Agent'       => 'ProyectoAgricola/1.0',
+                    'Accept-Language'  => 'es',
                 ])->get($url, [
                     'format'         => 'json',
                     'lat'            => $latitud,
@@ -64,7 +64,6 @@ class GeocodificacionService
                 'ciudad'             => $ciudad,
                 'direccion_completa' => $data['display_name'] ?? null,
             ];
-
         } catch (\Exception $e) {
             Log::error('Error en geocodificación inversa: ' . $e->getMessage(), [
                 'latitud'  => $latitud,

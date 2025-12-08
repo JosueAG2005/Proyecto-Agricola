@@ -39,6 +39,22 @@
   .border-success {
     border-color: #28a745 !important;
   }
+  /* Evitar zoom y recorte en maquinaria y orgánicos */
+.card-maquinaria-img,
+.card-organico-img {
+    height: 220px !important;
+    width: 100% !important;
+    object-fit: contain !important;
+    background: #ffffff !important;
+    transform: none !important;
+}
+
+/* Evitar que el hover del ganado afecte maquinaria y orgánicos */
+.ganado-card:hover .card-maquinaria-img,
+.ganado-card:hover .card-organico-img {
+    transform: none !important;
+}
+
 </style>
 
 <section class="hero" style="background:url('<?php echo e(asset('img/bg-agrovida.jpg')); ?>') center/cover no-repeat; min-height:400px; position:relative;">
@@ -53,8 +69,9 @@
   <div class="col-md-3 mb-2">
     <label class="text-dark small font-weight-bold mb-1">Categoría</label>
     <select name="categoria_id"
-            class="form-control"
-            onchange="this.form.submit()">
+        id="categoria_id"
+        class="form-control"
+        onchange="onCategoriaChange(this)">
       <option value="">Todas las categorías</option>
       <?php $__currentLoopData = $categorias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categoria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <option value="<?php echo e($categoria->id); ?>" <?php echo e(request('categoria_id') == $categoria->id ? 'selected' : ''); ?>>
@@ -65,7 +82,7 @@
     </select>
   </div>
 
-  <div class="col-md-3 mb-2">
+  <div class="col-md-3 mb-2 filtros-animales">
     <label class="text-dark small font-weight-bold mb-1">Tipo de Animal</label>
     <select name="tipo_animal_id"
             id="tipo_animal_id"
@@ -81,7 +98,7 @@
     </select>
   </div>
 
-  <div class="col-md-3 mb-2">
+  <div class="col-md-3 mb-2 filtros-animales">
     <label class="text-dark small font-weight-bold mb-1">Raza</label>
     <select name="raza_id"
             id="raza_id"
@@ -99,14 +116,64 @@
     </select>
   </div>
 
-  <div class="col-md-3 mb-2">
+  <div class="col-md-3 mb-2 filtros-maquinaria">
+    <label class="text-dark small font-weight-bold mb-1">Tipo de Maquinaria</label>
+    <select name="tipo_maquinaria_id"
+            id="tipo_maquinaria_id"
+            class="form-control"
+            onchange="this.form.submit()">
+      <option value="">Todos los tipos</option>
+      <?php $__currentLoopData = $tiposMaquinaria ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipoMaq): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <option value="<?php echo e($tipoMaq->id); ?>" <?php echo e(request('tipo_maquinaria_id') == $tipoMaq->id ? 'selected' : ''); ?>>
+          <?php echo e($tipoMaq->nombre); ?>
+
+        </option>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </select>
+</div>
+
+<div class="col-md-3 mb-2 filtros-maquinaria">
+    <label class="text-dark small font-weight-bold mb-1">Marca de Maquinaria</label>
+    <select name="marca_maquinaria_id"
+            id="marca_maquinaria_id"
+            class="form-control"
+            onchange="this.form.submit()">
+      <option value="">Todas las marcas</option>
+      <?php $__currentLoopData = $marcasMaquinaria ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $marca): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <option value="<?php echo e($marca->id); ?>" <?php echo e(request('marca_maquinaria_id') == $marca->id ? 'selected' : ''); ?>>
+          <?php echo e($marca->nombre); ?>
+
+        </option>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </select>
+</div>
+
+<div class="col-md-3 mb-2 filtros-organicos">
+    <label class="text-dark small font-weight-bold mb-1">Tipo de Cultivo</label>
+    <select name="tipo_cultivo_id"
+            id="tipo_cultivo_id"
+            class="form-control"
+            onchange="this.form.submit()">
+      <option value="">Todos los tipos</option>
+      <?php $__currentLoopData = $tiposCultivo ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipoCultivo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <option value="<?php echo e($tipoCultivo->id); ?>" <?php echo e(request('tipo_cultivo_id') == $tipoCultivo->id ? 'selected' : ''); ?>>
+          <?php echo e($tipoCultivo->nombre); ?>
+
+        </option>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </select>
+</div>
+
+
+
+<div class="col-md-4 mb-2">
     <label class="text-dark small font-weight-bold mb-1">Buscar</label>
     <div class="input-group">
       <div class="input-group-prepend">
         <span class="input-group-text bg-success text-white"><i class="fas fa-search"></i></span>
       </div>
       <input type="text" name="q" class="form-control"
-             placeholder="Buscar productos, marcas, lugares..."
+             placeholder="Buscar animales, maquinaria u orgánicos..."
              value="<?php echo e(request('q')); ?>">
     </div>
   </div>
@@ -238,42 +305,75 @@
         <div class="row">
           <?php $__currentLoopData = $maquinarias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $maquinaria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <div class="card h-100 shadow-sm rounded-lg border-0">
-                <?php if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0): ?>
-                  <img src="<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>" 
-                       class="card-img-top" 
-                       style="height:200px; object-fit:cover; cursor:pointer;"
-                       onclick="window.open('<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>', '_blank')"
-                       alt="<?php echo e($maquinaria->nombre); ?>">
-                <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                    <i class="fas fa-tractor fa-4x text-success"></i>
-                  </div>
-                <?php endif; ?>
-                <div class="card-body">
-                  <h5 class="card-title"><?php echo e($maquinaria->nombre); ?></h5>
-                  <p class="card-text text-muted small mb-2">
-                    <i class="fas fa-tag"></i> <?php echo e($maquinaria->tipoMaquinaria->nombre ?? 'N/A'); ?> | 
-                    <i class="fas fa-industry"></i> <?php echo e($maquinaria->marcaMaquinaria->nombre ?? 'N/A'); ?>
+              <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="text-decoration-none" style="color: inherit;">
+                <div class="card h-100 ganado-card shadow-lg rounded-lg border-success border-3 overflow-hidden" style="cursor: pointer;">
+                  <?php
+                    $imagenPrincipal = $maquinaria->imagenes->first()->ruta ?? null;
+                  ?>
+                  <?php if($imagenPrincipal): ?>
+                    <div class="card-img-wrapper position-relative overflow-hidden">
+                      <img src="<?php echo e(asset('storage/'.$imagenPrincipal)); ?>" 
+     class="card-img-top card-maquinaria-img"
+     alt="<?php echo e($maquinaria->nombre); ?>">
 
-                  </p>
-                  <div class="mb-2">
-                    <span class="badge badge-success"><?php echo e($maquinaria->categoria->nombre ?? 'Sin categoría'); ?></span>
-                    <span class="badge badge-<?php echo e($maquinaria->estado == 'disponible' ? 'success' : 'secondary'); ?>">
-                      <?php echo e(ucfirst(str_replace('_', ' ', $maquinaria->estado ?? 'N/A'))); ?>
-
-                    </span>
-                  </div>
-                  <?php if($maquinaria->precio_dia): ?>
-                    <p class="h5 text-success mb-0">Bs <?php echo e(number_format($maquinaria->precio_dia, 2)); ?>/día</p>
+                      <div class="position-absolute top-0 right-0 m-2">
+                        <span class="badge badge-success badge-lg shadow-sm">
+                          <i class="fas fa-star"></i> Destacado
+                        </span>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px; border-bottom: 3px solid #28a745;">
+                      <i class="fas fa-tractor fa-4x text-muted"></i>
+                    </div>
                   <?php endif; ?>
+                  <div class="card-body p-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-2" style="font-size: 1.1rem; line-height: 1.3;">
+                      <i class="fas fa-tag text-success mr-1"></i><?php echo e($maquinaria->nombre); ?>
+
+                    </h5>
+                    <ul class="ad-meta list-unstyled mb-2">
+                      <?php if($maquinaria->ubicacion): ?>
+                        <li class="mb-1"><i class="fas fa-map-marker-alt text-success"></i> <span class="small"><?php echo e(Str::limit($maquinaria->ubicacion, 40)); ?></span></li>
+                      <?php endif; ?>
+                      <?php if($maquinaria->tipoMaquinaria): ?>
+                        <li class="mb-1"><i class="fas fa-cog text-success"></i> <span class="small"><?php echo e($maquinaria->tipoMaquinaria->nombre); ?></span></li>
+                      <?php endif; ?>
+                      <?php if($maquinaria->fecha_publicacion ?? $maquinaria->created_at): ?>
+                        <li class="mb-1"><i class="fas fa-calendar-alt text-success"></i> <span class="small">Publicado: <?php echo e(\Carbon\Carbon::parse($maquinaria->fecha_publicacion ?? $maquinaria->created_at)->format('d/m/Y')); ?></span></li>
+                      <?php endif; ?>
+                    </ul>
+                    <div class="mb-2">
+                      <span class="badge badge-success badge-lg px-3 py-2 shadow-sm">
+                        <i class="fas fa-tags"></i> <?php echo e($maquinaria->categoria->nombre ?? 'Maquinaria'); ?>
+
+                      </span>
+                    </div>
+                    <?php if($maquinaria->precio_dia): ?>
+                      <div class="bg-success-light p-2 rounded mb-2 border-left border-success border-3">
+                        <small class="text-muted d-block mb-0">Precio</small>
+                        <h4 class="text-success font-weight-bold mb-0">
+                          <i class="fas fa-boliviano-sign"></i> <?php echo e(number_format($maquinaria->precio_dia, 2)); ?>/día
+                        </h4>
+                      </div>
+                    <?php else: ?>
+                      <div class="bg-light p-2 rounded mb-2 border-left border-secondary border-3">
+                        <span class="text-muted small">Precio a consultar</span>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                  <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top border-success border-2 p-2">
+                    <?php if($maquinaria->precio_dia): ?>
+                      <span class="price font-weight-bold text-success">Bs <?php echo e(number_format($maquinaria->precio_dia, 2)); ?>/día</span>
+                    <?php else: ?>
+                      <span class="price font-weight-bold text-muted small">Consultar</span>
+                    <?php endif; ?>
+                    <div class="btn btn-success btn-sm px-3 shadow-sm font-weight-bold">
+                      Ver Anuncio <i class="fas fa-arrow-right ml-1"></i>
+                    </div>
+                  </div>
                 </div>
-                <div class="card-footer bg-white border-top">
-                  <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
-                </div>
-              </div>
+              </a>
             </div>
           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
@@ -295,43 +395,76 @@
         <div class="row">
           <?php $__currentLoopData = $organicos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $organico): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <div class="card h-100 shadow-sm rounded-lg border-0">
-                <?php if($organico->imagenes && $organico->imagenes->count() > 0): ?>
-                  <img src="<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>" 
-                       class="card-img-top" 
-                       style="height:200px; object-fit:cover; cursor:pointer;"
-                       onclick="window.open('<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>', '_blank')"
-                       alt="<?php echo e($organico->nombre); ?>">
-                <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                    <i class="fas fa-leaf fa-4x text-success"></i>
-                  </div>
-                <?php endif; ?>
-                <div class="card-body">
-                  <h5 class="card-title"><?php echo e($organico->nombre); ?></h5>
-                  <p class="card-text text-muted small mb-2">
-                    <i class="fas fa-tag"></i> <?php echo e($organico->categoria->nombre ?? 'Sin categoría'); ?>
+              <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="text-decoration-none" style="color: inherit;">
+                <div class="card h-100 ganado-card shadow-lg rounded-lg border-success border-3 overflow-hidden" style="cursor: pointer;">
+                  <?php
+                    $imagenPrincipal = $organico->imagenes->first()->ruta ?? null;
+                  ?>
+                  <?php if($imagenPrincipal): ?>
+                    <div class="card-img-wrapper position-relative overflow-hidden">
+                      <img src="<?php echo e(asset('storage/'.$imagenPrincipal)); ?>" 
+     class="card-img-top card-organico-img"
+     alt="<?php echo e($organico->nombre); ?>">
 
-                    <?php if($organico->unidad): ?>
-                      | <i class="fas fa-balance-scale"></i> <?php echo e($organico->unidad->nombre); ?>
-
-                    <?php endif; ?>
-                  </p>
-                  <div class="mb-2">
-                    <?php if($organico->stock): ?>
-                      <span class="badge badge-info">Stock: <?php echo e($organico->stock); ?></span>
-                    <?php endif; ?>
-                  </div>
-                  <?php if($organico->precio): ?>
-                    <p class="h5 text-success mb-0">Bs <?php echo e(number_format($organico->precio, 2)); ?></p>
+                      <div class="position-absolute top-0 right-0 m-2">
+                        <span class="badge badge-success badge-lg shadow-sm">
+                          <i class="fas fa-star"></i> Destacado
+                        </span>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px; border-bottom: 3px solid #28a745;">
+                      <i class="fas fa-leaf fa-4x text-muted"></i>
+                    </div>
                   <?php endif; ?>
+                  <div class="card-body p-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-2" style="font-size: 1.1rem; line-height: 1.3;">
+                      <i class="fas fa-tag text-success mr-1"></i><?php echo e($organico->nombre); ?>
+
+                    </h5>
+                    <ul class="ad-meta list-unstyled mb-2">
+                      <?php if($organico->origen): ?>
+                        <li class="mb-1"><i class="fas fa-map-marker-alt text-success"></i> <span class="small"><?php echo e(Str::limit($organico->origen, 40)); ?></span></li>
+                      <?php endif; ?>
+                      <?php if($organico->fecha_cosecha): ?>
+                        <li class="mb-1"><i class="fas fa-calendar-alt text-success"></i> <span class="small">Cosecha: <?php echo e(\Carbon\Carbon::parse($organico->fecha_cosecha)->format('d/m/Y')); ?></span></li>
+                      <?php endif; ?>
+                      <?php if($organico->created_at): ?>
+                        <li class="mb-1"><i class="fas fa-calendar-alt text-success"></i> <span class="small">Publicado: <?php echo e(\Carbon\Carbon::parse($organico->created_at)->format('d/m/Y')); ?></span></li>
+                      <?php endif; ?>
+                    </ul>
+                    <div class="mb-2">
+                      <span class="badge badge-success badge-lg px-3 py-2 shadow-sm">
+                        <i class="fas fa-tags"></i> <?php echo e($organico->categoria->nombre ?? 'Orgánico'); ?>
+
+                      </span>
+                    </div>
+                    <?php if($organico->precio): ?>
+                      <div class="bg-success-light p-2 rounded mb-2 border-left border-success border-3">
+                        <small class="text-muted d-block mb-0">Precio</small>
+                        <h4 class="text-success font-weight-bold mb-0">
+                          <i class="fas fa-boliviano-sign"></i> <?php echo e(number_format($organico->precio, 2)); ?>
+
+                        </h4>
+                      </div>
+                    <?php else: ?>
+                      <div class="bg-light p-2 rounded mb-2 border-left border-secondary border-3">
+                        <span class="text-muted small">Precio a consultar</span>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                  <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top border-success border-2 p-2">
+                    <?php if($organico->precio): ?>
+                      <span class="price font-weight-bold text-success">Bs <?php echo e(number_format($organico->precio, 2)); ?></span>
+                    <?php else: ?>
+                      <span class="price font-weight-bold text-muted small">Consultar</span>
+                    <?php endif; ?>
+                    <div class="btn btn-success btn-sm px-3 shadow-sm font-weight-bold">
+                      Ver Anuncio <i class="fas fa-arrow-right ml-1"></i>
+                    </div>
+                  </div>
                 </div>
-                <div class="card-footer bg-white border-top">
-                  <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="btn btn-success btn-sm btn-block">
-                    <i class="fas fa-eye"></i> Ver Detalles
-                  </a>
-                </div>
-              </div>
+              </a>
             </div>
           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
@@ -496,50 +629,77 @@
         <div class="row">
           <?php $__currentLoopData = $maquinarias->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $maquinaria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <div class="card h-100 shadow-sm rounded-lg border-0">
-                <?php if($maquinaria->imagenes && $maquinaria->imagenes->count() > 0): ?>
-                  <img src="<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>" 
-                       class="card-img-top" 
-                       style="height:200px; object-fit:cover; cursor:pointer;"
-                       onclick="window.open('<?php echo e(asset('storage/'.$maquinaria->imagenes->first()->ruta)); ?>', '_blank')"
-                       alt="<?php echo e($maquinaria->nombre); ?>">
-                <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                    <i class="fas fa-tractor fa-4x text-success"></i>
-                  </div>
-                <?php endif; ?>
-                <div class="card-body">
-                  <h5 class="card-title"><?php echo e($maquinaria->nombre); ?></h5>
-                  <p class="card-text text-muted small mb-2">
-                    <i class="fas fa-tag"></i> <?php echo e($maquinaria->tipoMaquinaria->nombre ?? 'N/A'); ?>
+              <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="text-decoration-none" style="color: inherit;">
+                <div class="card h-100 ganado-card shadow-lg rounded-lg border-success border-3 overflow-hidden" style="cursor: pointer;">
+                  <?php
+                    $imagenPrincipal = $maquinaria->imagenes->first()->ruta ?? null;
+                  ?>
+                  <?php if($imagenPrincipal): ?>
+                    <div class="card-img-wrapper position-relative overflow-hidden">
+                      <img src="<?php echo e(asset('storage/'.$imagenPrincipal)); ?>" 
+     class="card-img-top card-maquinaria-img"
+     alt="<?php echo e($maquinaria->nombre); ?>">
 
-                  </p>
-                  <?php if($maquinaria->precio_dia): ?>
-                    <p class="h5 text-success mb-0">Bs <?php echo e(number_format($maquinaria->precio_dia, 2)); ?>/día</p>
+                      <div class="position-absolute top-0 right-0 m-2">
+                        <span class="badge badge-success badge-lg shadow-sm">
+                          <i class="fas fa-star"></i> Destacado
+                        </span>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px; border-bottom: 3px solid #28a745;">
+                      <i class="fas fa-tractor fa-4x text-muted"></i>
+                    </div>
                   <?php endif; ?>
-                </div>
-                <div class="card-footer bg-white border-top">
-                  <div class="d-flex gap-2">
-                    <a href="<?php echo e(route('maquinarias.show', $maquinaria->id)); ?>" class="btn btn-outline-success btn-sm flex-fill">
-                      <i class="fas fa-eye"></i> Ver
-                    </a>
-                    <?php if(auth()->guard()->check()): ?>
-                      <?php if($maquinaria->precio_dia): ?>
-                        <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline">
-                          <?php echo csrf_field(); ?>
-                          <input type="hidden" name="product_type" value="maquinaria">
-                          <input type="hidden" name="product_id" value="<?php echo e($maquinaria->id); ?>">
-                          <input type="hidden" name="cantidad" value="1">
-                          <input type="hidden" name="dias_alquiler" value="1">
-                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
-                            <i class="fas fa-cart-plus"></i>
-                          </button>
-                        </form>
-                      <?php endif; ?>
+                  <div class="card-body p-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-2" style="font-size: 1.1rem; line-height: 1.3;">
+                      <i class="fas fa-tag text-success mr-1"></i><?php echo e($maquinaria->nombre); ?>
+
+                    </h5>
+                    <div class="mb-2">
+                      <p class="card-text text-muted small mb-1">
+                        <i class="fas fa-map-marker-alt text-success"></i> 
+                        <span class="ml-1"><?php echo e(Str::limit($maquinaria->ubicacion ?? 'Sin ubicación', 40)); ?></span>
+                      </p>
+                    </div>
+                    <div class="mb-3">
+                      <span class="badge badge-success badge-lg px-3 py-2 shadow-sm">
+                        <i class="fas fa-tags"></i> <?php echo e($maquinaria->categoria->nombre ?? 'Sin categoría'); ?>
+
+                      </span>
+                    </div>
+                    <?php if($maquinaria->precio_dia): ?>
+                      <div class="bg-success-light p-2 rounded mb-2 border-left border-success border-3">
+                        <small class="text-muted d-block mb-0">Precio</small>
+                        <h4 class="text-success font-weight-bold mb-0">
+                          <i class="fas fa-boliviano-sign"></i> <?php echo e(number_format($maquinaria->precio_dia, 2)); ?>/día
+                        </h4>
+                      </div>
                     <?php endif; ?>
                   </div>
+                  <div class="card-footer bg-white border-top border-success border-2 p-2">
+                    <div class="d-flex gap-2">
+                      <div class="btn btn-success btn-sm flex-fill shadow-sm font-weight-bold">
+                        <i class="fas fa-eye mr-1"></i> Ver
+                      </div>
+                      <?php if(auth()->guard()->check()): ?>
+                        <?php if($maquinaria->precio_dia): ?>
+                          <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline" onclick="event.stopPropagation();">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="product_type" value="maquinaria">
+                            <input type="hidden" name="product_id" value="<?php echo e($maquinaria->id); ?>">
+                            <input type="hidden" name="cantidad" value="1">
+                            <input type="hidden" name="dias_alquiler" value="1">
+                            <button type="submit" class="btn btn-success btn-sm shadow-sm" title="Agregar al carrito" onclick="event.stopPropagation();">
+                              <i class="fas fa-cart-plus"></i>
+                            </button>
+                          </form>
+                        <?php endif; ?>
+                      <?php endif; ?>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </a>
             </div>
           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
@@ -559,49 +719,77 @@
         <div class="row">
           <?php $__currentLoopData = $organicos->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $organico): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <div class="card h-100 shadow-sm rounded-lg border-0">
-                <?php if($organico->imagenes && $organico->imagenes->count() > 0): ?>
-                  <img src="<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>" 
-                       class="card-img-top" 
-                       style="height:200px; object-fit:cover; cursor:pointer;"
-                       onclick="window.open('<?php echo e(asset('storage/'.$organico->imagenes->first()->ruta)); ?>', '_blank')"
-                       alt="<?php echo e($organico->nombre); ?>">
-                <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                    <i class="fas fa-leaf fa-4x text-success"></i>
-                  </div>
-                <?php endif; ?>
-                <div class="card-body">
-                  <h5 class="card-title"><?php echo e($organico->nombre); ?></h5>
-                  <p class="card-text text-muted small mb-2">
-                    <i class="fas fa-tag"></i> <?php echo e($organico->categoria->nombre ?? 'Sin categoría'); ?>
+              <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="text-decoration-none" style="color: inherit;">
+                <div class="card h-100 ganado-card shadow-lg rounded-lg border-success border-3 overflow-hidden" style="cursor: pointer;">
+                  <?php
+                    $imagenPrincipal = $organico->imagenes->first()->ruta ?? null;
+                  ?>
+                  <?php if($imagenPrincipal): ?>
+                    <div class="card-img-wrapper position-relative overflow-hidden">
+                      <img src="<?php echo e(asset('storage/'.$imagenPrincipal)); ?>" 
+     class="card-img-top card-organico-img"
+     alt="<?php echo e($organico->nombre); ?>">
 
-                  </p>
-                  <?php if($organico->precio): ?>
-                    <p class="h5 text-success mb-0">Bs <?php echo e(number_format($organico->precio, 2)); ?></p>
+                      <div class="position-absolute top-0 right-0 m-2">
+                        <span class="badge badge-success badge-lg shadow-sm">
+                          <i class="fas fa-star"></i> Destacado
+                        </span>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px; border-bottom: 3px solid #28a745;">
+                      <i class="fas fa-leaf fa-4x text-muted"></i>
+                    </div>
                   <?php endif; ?>
-                </div>
-                <div class="card-footer bg-white border-top">
-                  <div class="d-flex gap-2">
-                    <a href="<?php echo e(route('organicos.show', $organico->id)); ?>" class="btn btn-outline-success btn-sm flex-fill">
-                      <i class="fas fa-eye"></i> Ver
-                    </a>
-                    <?php if(auth()->guard()->check()): ?>
-                      <?php if($organico->precio && ($organico->stock ?? 0) > 0): ?>
-                        <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline">
-                          <?php echo csrf_field(); ?>
-                          <input type="hidden" name="product_type" value="organico">
-                          <input type="hidden" name="product_id" value="<?php echo e($organico->id); ?>">
-                          <input type="hidden" name="cantidad" value="1">
-                          <button type="submit" class="btn btn-success btn-sm" title="Agregar al carrito">
-                            <i class="fas fa-cart-plus"></i>
-                          </button>
-                        </form>
-                      <?php endif; ?>
+                  <div class="card-body p-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-2" style="font-size: 1.1rem; line-height: 1.3;">
+                      <i class="fas fa-tag text-success mr-1"></i><?php echo e($organico->nombre); ?>
+
+                    </h5>
+                    <div class="mb-2">
+                      <p class="card-text text-muted small mb-1">
+                        <i class="fas fa-map-marker-alt text-success"></i> 
+                        <span class="ml-1"><?php echo e(Str::limit($organico->origen ?? 'Sin ubicación', 40)); ?></span>
+                      </p>
+                    </div>
+                    <div class="mb-3">
+                      <span class="badge badge-success badge-lg px-3 py-2 shadow-sm">
+                        <i class="fas fa-tags"></i> <?php echo e($organico->categoria->nombre ?? 'Sin categoría'); ?>
+
+                      </span>
+                    </div>
+                    <?php if($organico->precio): ?>
+                      <div class="bg-success-light p-2 rounded mb-2 border-left border-success border-3">
+                        <small class="text-muted d-block mb-0">Precio</small>
+                        <h4 class="text-success font-weight-bold mb-0">
+                          <i class="fas fa-boliviano-sign"></i> <?php echo e(number_format($organico->precio, 2)); ?>
+
+                        </h4>
+                      </div>
                     <?php endif; ?>
                   </div>
+                  <div class="card-footer bg-white border-top border-success border-2 p-2">
+                    <div class="d-flex gap-2">
+                      <div class="btn btn-success btn-sm flex-fill shadow-sm font-weight-bold">
+                        <i class="fas fa-eye mr-1"></i> Ver
+                      </div>
+                      <?php if(auth()->guard()->check()): ?>
+                        <?php if($organico->precio && ($organico->stock ?? 0) > 0): ?>
+                          <form action="<?php echo e(route('cart.add')); ?>" method="POST" class="d-inline" onclick="event.stopPropagation();">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="product_type" value="organico">
+                            <input type="hidden" name="product_id" value="<?php echo e($organico->id); ?>">
+                            <input type="hidden" name="cantidad" value="1">
+                            <button type="submit" class="btn btn-success btn-sm shadow-sm" title="Agregar al carrito" onclick="event.stopPropagation();">
+                              <i class="fas fa-cart-plus"></i>
+                            </button>
+                          </form>
+                        <?php endif; ?>
+                      <?php endif; ?>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </a>
             </div>
           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
@@ -618,8 +806,10 @@
 <script>
 // Función para filtrar razas según el tipo de animal seleccionado
 function filtrarRazas() {
-    const tipoAnimalId = document.getElementById('tipo_animal_id').value;
+    const tipoAnimalId = document.getElementById('tipo_animal_id')?.value;
     const razaSelect = document.getElementById('raza_id');
+    if (!razaSelect) return;
+
     const todasLasOpciones = razaSelect.querySelectorAll('option');
     
     // Mostrar/ocultar opciones según el tipo de animal
@@ -629,7 +819,7 @@ function filtrarRazas() {
             option.style.display = '';
         } else {
             const tipoAnimalIdRaza = option.getAttribute('data-tipo-animal-id');
-            if (tipoAnimalId === '' || tipoAnimalIdRaza === tipoAnimalId) {
+            if (!tipoAnimalId || tipoAnimalIdRaza === tipoAnimalId) {
                 option.style.display = '';
             } else {
                 option.style.display = 'none';
@@ -637,7 +827,7 @@ function filtrarRazas() {
         }
     });
     
-    // Si se cambió el tipo de animal y la raza seleccionada no corresponde, limpiar la selección
+    // Si la raza seleccionada ya no aplica, limpiarla
     const razaSeleccionada = razaSelect.value;
     if (razaSeleccionada) {
         const opcionSeleccionada = razaSelect.querySelector(`option[value="${razaSeleccionada}"]`);
@@ -646,6 +836,82 @@ function filtrarRazas() {
         }
     }
 }
+
+// ===== NUEVO: mostrar/ocultar grupos de filtros según categoría =====
+function actualizarFiltrosPorCategoria() {
+    const categoriaSelect    = document.getElementById('categoria_id');
+    if (!categoriaSelect) return;
+
+    const filtrosAnimales    = document.querySelectorAll('.filtros-animales');
+    const filtrosMaquinaria  = document.querySelectorAll('.filtros-maquinaria');
+    const filtrosOrganicos   = document.querySelectorAll('.filtros-organicos');
+
+    const option = categoriaSelect.options[categoriaSelect.selectedIndex];
+    const texto  = option ? option.text.toLowerCase() : '';
+    const valor  = categoriaSelect.value;
+
+    let mostrarAnimales   = false;
+    let mostrarMaquinaria = false;
+    let mostrarOrganicos  = false;
+
+    if (!valor) {
+        // Sin categoría: puedes decidir qué mostrar.
+        // Aquí muestro TODOS:
+        mostrarAnimales   = true;
+        mostrarMaquinaria = true;
+        mostrarOrganicos  = true;
+    } else if (texto.includes('animal')) {
+        mostrarAnimales   = true;
+    } else if (texto.includes('maquinaria')) {
+        mostrarMaquinaria = true;
+    } else if (texto.includes('orgánico') || texto.includes('organico')) {
+        mostrarOrganicos  = true;
+    }
+
+    // Helper para mostrar/ocultar grupos
+    function toggleGroup(nodes, visible) {
+        nodes.forEach(el => {
+            el.style.display = visible ? '' : 'none';
+        });
+    }
+
+    toggleGroup(filtrosAnimales,   mostrarAnimales);
+    toggleGroup(filtrosMaquinaria, mostrarMaquinaria);
+    toggleGroup(filtrosOrganicos,  mostrarOrganicos);
+
+    // Limpiar valores de los grupos ocultos para que no filtren
+    if (!mostrarAnimales) {
+        const tipoAnimal = document.getElementById('tipo_animal_id');
+        const raza       = document.getElementById('raza_id');
+        if (tipoAnimal) tipoAnimal.value = '';
+        if (raza) raza.value = '';
+    }
+
+    if (!mostrarMaquinaria) {
+        const tipoM = document.getElementById('tipo_maquinaria_id');
+        const marca = document.getElementById('marca_maquinaria_id');
+        if (tipoM) tipoM.value = '';
+        if (marca) marca.value = '';
+    }
+
+    if (!mostrarOrganicos) {
+        const tipoC = document.getElementById('tipo_cultivo_id');
+        if (tipoC) tipoC.value = '';
+    }
+}
+
+function onCategoriaChange(select) {
+    actualizarFiltrosPorCategoria();
+    // Auto-submit al cambiar categoría
+    select.form.submit();
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarFiltrosPorCategoria();
+    filtrarRazas();
+});
+
 
 // Ejecutar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {

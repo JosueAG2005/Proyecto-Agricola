@@ -16,18 +16,18 @@ class MaquinariaController extends Controller
         $q = request('q');
         $maquinarias = Maquinaria::with(['tipoMaquinaria', 'marcaMaquinaria', 'categoria', 'user', 'estadoMaquinaria'])
             ->when($q, fn($qb) =>
-                $qb->where('nombre','ilike',"%$q%")
-                   ->orWhereHas('tipoMaquinaria', function($query) use ($q) {
-                       $query->where('nombre', 'ilike', "%$q%");
-                   })
-                   ->orWhereHas('marcaMaquinaria', function($query) use ($q) {
-                       $query->where('nombre', 'ilike', "%$q%");
-                   }))
-            ->orderBy('id','desc')
+            $qb->where('nombre', 'ilike', "%$q%")
+                ->orWhereHas('tipoMaquinaria', function ($query) use ($q) {
+                    $query->where('nombre', 'ilike', "%$q%");
+                })
+                ->orWhereHas('marcaMaquinaria', function ($query) use ($q) {
+                    $query->where('nombre', 'ilike', "%$q%");
+                }))
+            ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('maquinarias.index', compact('maquinarias','q'));
+        return view('maquinarias.index', compact('maquinarias', 'q'));
     }
 
     public function create()
@@ -43,7 +43,7 @@ class MaquinariaController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id();
-        
+
         // Obtener información geográfica si hay coordenadas
         if ($request->latitud && $request->longitud) {
             $geocodificacionService = new GeocodificacionService();
@@ -51,23 +51,23 @@ class MaquinariaController extends Controller
                 (float) $request->latitud,
                 (float) $request->longitud
             );
-            
+
             if ($infoGeografica) {
                 $data['departamento'] = $infoGeografica['departamento'];
                 $data['municipio'] = $infoGeografica['municipio'];
                 $data['provincia'] = $infoGeografica['provincia'];
                 $data['ciudad'] = $infoGeografica['ciudad'];
-                
+
                 // Si no hay ubicación escrita, usar la dirección completa
                 if (empty($data['ubicacion']) && isset($infoGeografica['direccion_completa'])) {
                     $data['ubicacion'] = $infoGeografica['direccion_completa'];
                 }
             }
         }
-        
+
         // Crear la maquinaria
         $maquinaria = Maquinaria::create($data);
-        
+
         // Guardar las imágenes si existen (máximo 3)
         if ($request->hasFile('imagenes')) {
             $orden = 0;
@@ -83,8 +83,8 @@ class MaquinariaController extends Controller
                 }
             }
         }
-        
-        return redirect()->route('maquinarias.index')->with('ok','Maquinaria creada');
+
+        return redirect()->route('maquinarias.index')->with('ok', 'Maquinaria creada');
     }
 
     public function show(Maquinaria $maquinaria)
@@ -119,31 +119,33 @@ class MaquinariaController extends Controller
         }
 
         $data = $request->validated();
-        
+
         // Obtener información geográfica si hay coordenadas (y si cambiaron)
-        if ($request->latitud && $request->longitud && 
-            ($maquinaria->latitud != $request->latitud || $maquinaria->longitud != $request->longitud)) {
+        if (
+            $request->latitud && $request->longitud &&
+            ($maquinaria->latitud != $request->latitud || $maquinaria->longitud != $request->longitud)
+        ) {
             $geocodificacionService = new GeocodificacionService();
             $infoGeografica = $geocodificacionService->obtenerInformacionGeografica(
                 (float) $request->latitud,
                 (float) $request->longitud
             );
-            
+
             if ($infoGeografica) {
                 $data['departamento'] = $infoGeografica['departamento'];
                 $data['municipio'] = $infoGeografica['municipio'];
                 $data['provincia'] = $infoGeografica['provincia'];
                 $data['ciudad'] = $infoGeografica['ciudad'];
-                
+
                 // Si no hay ubicación escrita, usar la dirección completa
                 if (empty($data['ubicacion']) && isset($infoGeografica['direccion_completa'])) {
                     $data['ubicacion'] = $infoGeografica['direccion_completa'];
                 }
             }
         }
-        
+
         $maquinaria->update($data);
-        
+
         // Eliminar imágenes marcadas para eliminar
         if ($request->has('imagenes_eliminar')) {
             foreach ($request->imagenes_eliminar as $imagenId) {
@@ -156,14 +158,14 @@ class MaquinariaController extends Controller
                 }
             }
         }
-        
+
         // Agregar nuevas imágenes
         if ($request->hasFile('imagenes')) {
             $totalImagenesActuales = $maquinaria->imagenes()->count();
             $maxOrden = $maquinaria->imagenes()->max('orden') ?? -1;
             $orden = $maxOrden + 1;
             $espaciosDisponibles = 3 - $totalImagenesActuales;
-            
+
             if ($espaciosDisponibles > 0) {
                 $imagenes = array_slice($request->file('imagenes'), 0, $espaciosDisponibles);
                 foreach ($imagenes as $imagen) {
@@ -178,8 +180,8 @@ class MaquinariaController extends Controller
                 }
             }
         }
-        
-        return redirect()->route('maquinarias.index')->with('ok','Maquinaria actualizada');
+
+        return redirect()->route('maquinarias.index')->with('ok', 'Maquinaria actualizada');
     }
 
     public function destroy(Maquinaria $maquinaria)
@@ -196,8 +198,8 @@ class MaquinariaController extends Controller
                 Storage::disk('public')->delete($imagen->ruta);
             }
         }
-        
+
         $maquinaria->delete();
-        return redirect()->route('maquinarias.index')->with('ok','Maquinaria eliminada');
+        return redirect()->route('maquinarias.index')->with('ok', 'Maquinaria eliminada');
     }
 }

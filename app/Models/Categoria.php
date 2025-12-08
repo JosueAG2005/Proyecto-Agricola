@@ -11,14 +11,12 @@ class Categoria extends Model
 
     protected $fillable = ['nombre', 'descripcion'];
 
-    // 👇 Relación inversa correctamente colocada dentro de la clase
     public function ganados()
     {
         return $this->hasMany(Ganado::class);
     }
     public function maquinarias()
-{
-    return $this->hasMany(Maquinaria::class, 'categoria_id');
-}
-
+    {
+        return $this->hasMany(Maquinaria::class, 'categoria_id');
+    }
 }

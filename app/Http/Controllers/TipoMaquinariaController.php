@@ -13,9 +13,11 @@ class TipoMaquinariaController extends Controller
     public function index()
     {
         $q = request('q');
-        $items = TipoMaquinaria::when($q, fn($qb) =>
-                $qb->where('nombre', 'ilike', "%$q%")
-            )
+        $items = TipoMaquinaria::when(
+            $q,
+            fn($qb) =>
+            $qb->where('nombre', 'ilike', "%$q%")
+        )
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();

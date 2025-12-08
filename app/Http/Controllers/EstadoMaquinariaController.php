@@ -13,9 +13,11 @@ class EstadoMaquinariaController extends Controller
     public function index()
     {
         $q = request('q');
-        $items = EstadoMaquinaria::when($q, fn($qb) =>
-                $qb->where('nombre', 'ilike', "%$q%")
-            )
+        $items = EstadoMaquinaria::when(
+            $q,
+            fn($qb) =>
+            $qb->where('nombre', 'ilike', "%$q%")
+        )
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();

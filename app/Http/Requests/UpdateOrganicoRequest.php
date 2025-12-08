@@ -25,7 +25,7 @@ class UpdateOrganicoRequest extends FormRequest
             'latitud_origen'     => 'nullable|numeric|between:-90,90',
             'longitud_origen'    => 'nullable|numeric|between:-180,180',
             'imagenes.*'         => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
-            'imagenes_eliminar.*'=> 'nullable|exists:organico_imagenes,id',
+            'imagenes_eliminar.*' => 'nullable|exists:organico_imagenes,id',
             'tipo_cultivo_id'    => ['required', 'exists:tipo_cultivos,id'],
         ];
     }

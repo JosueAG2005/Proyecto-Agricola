@@ -72,26 +72,28 @@ class User extends Authenticatable
         if ($this->role_id) {
             // Intentar obtener la relación (si está cargada)
             $roleRelation = $this->getRelationValue('role');
-            
+
             // Si la relación está cargada y es un objeto Role
             if ($roleRelation instanceof Role) {
                 return $roleRelation->nombre;
             }
-            
+
             // Si no está cargada, obtenerla directamente
             $role = Role::find($this->role_id);
             if ($role) {
                 return $role->nombre;
             }
         }
-        
+
         // Fallback: si existe el campo 'role' antiguo (string) y no es la relación
-        if (isset($this->attributes['role']) && 
-            is_string($this->attributes['role']) && 
-            !$this->relationLoaded('role')) {
+        if (
+            isset($this->attributes['role']) &&
+            is_string($this->attributes['role']) &&
+            !$this->relationLoaded('role')
+        ) {
             return $this->attributes['role'];
         }
-        
+
         return 'cliente'; // Por defecto
     }
 

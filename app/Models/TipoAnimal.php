@@ -8,6 +8,3 @@ class TipoAnimal extends Model
 {
     protected $fillable = ['nombre', 'descripcion'];
 }
-
-
-
