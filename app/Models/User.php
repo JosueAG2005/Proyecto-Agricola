@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+// IMPORTANTE: si quieres puedes importar las clases explícitamente
+use App\Models\Ganado;
+use App\Models\Maquinaria;
+use App\Models\Organico;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -61,6 +66,27 @@ class User extends Authenticatable
     public function solicitudesVendedor()
     {
         return $this->hasMany(SolicitudVendedor::class);
+    }
+
+    /**
+     * === NUEVAS RELACIONES PARA EL DASHBOARD ===
+     * Un usuario (vendedor) puede tener muchos registros de ganado, maquinaria y orgánicos
+     * Se asume que las tablas tienen una columna user_id que referencia a users.id
+     */
+
+    public function ganados()
+    {
+        return $this->hasMany(Ganado::class, 'user_id');
+    }
+
+    public function maquinarias()
+    {
+        return $this->hasMany(Maquinaria::class, 'user_id');
+    }
+
+    public function organicos()
+    {
+        return $this->hasMany(Organico::class, 'user_id');
     }
 
     /**
