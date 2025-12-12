@@ -13,7 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProductosLentosExport;
-use Dompdf\Dompdf;
+//use Dompdf\Dompdf;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 
 
@@ -347,89 +349,83 @@ class ReporteController extends Controller
     }
 
     /**
-     * Exportar reporte de ventas a PDF (Dompdf)
-     */
-    public function exportarVentasPdf(Request $request)
-    {
-        // Filtros (igual que en ventas())
-        $desde       = $request->desde ? Carbon::parse($request->desde) : Carbon::now()->subMonths(6);
-        $hasta       = $request->hasta ? Carbon::parse($request->hasta) : Carbon::now();
-        $categoria   = $request->categoria;
-        $estado      = $request->estado;
-        $vendedor_id = $request->vendedor_id;
+ * Exportar reporte de ventas a PDF
+ */
+public function exportarVentasPdf(Request $request)
+{
+    // Filtros (igual que en ventas())
+    $desde       = $request->desde ? Carbon::parse($request->desde) : Carbon::now()->subMonths(6);
+    $hasta       = $request->hasta ? Carbon::parse($request->hasta) : Carbon::now();
+    $categoria   = $request->categoria;
+    $estado      = $request->estado;
+    $vendedor_id = $request->vendedor_id;
 
-        // Pedidos base
-        $pedidosQuery = Pedido::whereBetween('created_at', [$desde, $hasta]);
+    // Pedidos base
+    $pedidosQuery = Pedido::whereBetween('created_at', [$desde, $hasta]);
 
-        if ($estado) {
-            $pedidosQuery->where('estado', $estado);
-        }
-        if ($vendedor_id) {
-            $pedidosQuery->where('user_id', $vendedor_id);
-        }
-
-        $pedidos        = $pedidosQuery->get();
-        $totalPedidos   = $pedidos->count();
-        $totalIngresos  = $pedidos->sum('total');
-        $ticketPromedio = $totalPedidos > 0 ? round($totalIngresos / $totalPedidos, 2) : 0;
-
-        // Ventas por categoría (mismo query que en ventas())
-        $ventasPorCategoria = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
-            ->whereBetween('pedidos.created_at', [$desde, $hasta])
-            ->when($estado, function ($q) use ($estado) {
-                return $q->where('pedidos.estado', $estado);
-            })
-            ->when($vendedor_id, function ($q) use ($vendedor_id) {
-                return $q->where('pedidos.user_id', $vendedor_id);
-            })
-            ->when($categoria, function ($q) use ($categoria) {
-                return $q->where('pedido_detalles.product_type', $categoria);
-            })
-            ->select(
-                'pedido_detalles.product_type as categoria',
-                DB::raw('COUNT(DISTINCT pedidos.id) as total_pedidos'),
-                DB::raw('SUM(pedido_detalles.cantidad) as total_cantidad'),
-                DB::raw('SUM(pedido_detalles.subtotal) as ingresos_totales'),
-                DB::raw('AVG(pedido_detalles.precio_unitario) as precio_promedio')
-            )
-            ->groupBy('pedido_detalles.product_type')
-            ->get();
-
-        // Tasa de conversión (igual que en ventas())
-        $pedidosTotalesQuery = Pedido::whereBetween('created_at', [$desde, $hasta]);
-        if ($vendedor_id) {
-            $pedidosTotalesQuery->where('user_id', $vendedor_id);
-        }
-        $pedidosTotales   = $pedidosTotalesQuery->get();
-        $totalParaConv    = $pedidosTotales->count();
-        $pedidosEntregados = $pedidosTotales->where('estado', 'entregado')->count();
-        $tasaConversion   = $totalParaConv > 0 ? round(($pedidosEntregados / $totalParaConv) * 100, 2) : 0;
-
-        // Generar HTML con Blade
-        $html = view('admin.reportes.ventas_pdf', [
-            'desde'              => $desde,
-            'hasta'              => $hasta,
-            'categoria'          => $categoria,
-            'estado'             => $estado,
-            'vendedor_id'        => $vendedor_id,
-            'ventasPorCategoria' => $ventasPorCategoria,
-            'totalPedidos'       => $totalPedidos,
-            'totalIngresos'      => $totalIngresos,
-            'ticketPromedio'     => $ticketPromedio,
-            'tasaConversion'     => $tasaConversion,
-        ])->render();
-
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('a4', 'portrait');
-        $dompdf->render();
-
-        $fechaArchivo = Carbon::now()->format('Y-m-d_His');
-
-        return response($dompdf->output(), 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="reporte_ventas_' . $fechaArchivo . '.pdf"');
+    if ($estado) {
+        $pedidosQuery->where('estado', $estado);
     }
+    if ($vendedor_id) {
+        $pedidosQuery->where('user_id', $vendedor_id);
+    }
+
+    $pedidos        = $pedidosQuery->get();
+    $totalPedidos   = $pedidos->count();
+    $totalIngresos  = $pedidos->sum('total');
+    $ticketPromedio = $totalPedidos > 0 ? round($totalIngresos / $totalPedidos, 2) : 0;
+
+    // Ventas por categoría (mismo query que en ventas())
+    $ventasPorCategoria = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
+        ->whereBetween('pedidos.created_at', [$desde, $hasta])
+        ->when($estado, function ($q) use ($estado) {
+            return $q->where('pedidos.estado', $estado);
+        })
+        ->when($vendedor_id, function ($q) use ($vendedor_id) {
+            return $q->where('pedidos.user_id', $vendedor_id);
+        })
+        ->when($categoria, function ($q) use ($categoria) {
+            return $q->where('pedido_detalles.product_type', $categoria);
+        })
+        ->select(
+            'pedido_detalles.product_type as categoria',
+            DB::raw('COUNT(DISTINCT pedidos.id) as total_pedidos'),
+            DB::raw('SUM(pedido_detalles.cantidad) as total_cantidad'),
+            DB::raw('SUM(pedido_detalles.subtotal) as ingresos_totales'),
+            DB::raw('AVG(pedido_detalles.precio_unitario) as precio_promedio')
+        )
+        ->groupBy('pedido_detalles.product_type')
+        ->get();
+
+    // Tasa de conversión (igual que en ventas())
+    $pedidosTotalesQuery = Pedido::whereBetween('created_at', [$desde, $hasta]);
+    if ($vendedor_id) {
+        $pedidosTotalesQuery->where('user_id', $vendedor_id);
+    }
+    $pedidosTotales   = $pedidosTotalesQuery->get();
+    $totalParaConv    = $pedidosTotales->count();
+    $pedidosEntregados = $pedidosTotales->where('estado', 'entregado')->count();
+    $tasaConversion   = $totalParaConv > 0 ? round(($pedidosEntregados / $totalParaConv) * 100, 2) : 0;
+
+    // Generar PDF con el facade Pdf
+    $pdf = Pdf::loadView('admin.reportes.ventas_pdf', [
+        'desde'              => $desde,
+        'hasta'              => $hasta,
+        'categoria'          => $categoria,
+        'estado'             => $estado,
+        'vendedor_id'        => $vendedor_id,
+        'ventasPorCategoria' => $ventasPorCategoria,
+        'totalPedidos'       => $totalPedidos,
+        'totalIngresos'      => $totalIngresos,
+        'ticketPromedio'     => $ticketPromedio,
+        'tasaConversion'     => $tasaConversion,
+    ]);
+
+    $fechaArchivo = Carbon::now()->format('Y-m-d_His');
+
+    return $pdf->download('reporte_ventas_' . $fechaArchivo . '.pdf');
+}
+
 
 
     /**
@@ -613,102 +609,91 @@ class ReporteController extends Controller
     }
 
     /**
-     * Exportar reporte de vendedores a PDF (Dompdf)
-     */
+ * Exportar reporte de vendedores a PDF
+ */
+public function exportarVendedoresPdf(Request $request)
+{
+    // === mismos filtros que en vendedores() ===
+    $desde = $request->desde ? Carbon::parse($request->desde) : Carbon::now()->subMonths(6);
+    $hasta = $request->hasta ? Carbon::parse($request->hasta) : Carbon::now();
+    $vendedor_id = $request->vendedor_id;
 
-    public function exportarVendedoresPdf(Request $request)
-    {
-        // === mismos filtros que en vendedores() ===
-        $desde = $request->desde ? Carbon::parse($request->desde) : Carbon::now()->subMonths(6);
-        $hasta = $request->hasta ? Carbon::parse($request->hasta) : Carbon::now();
-        $vendedor_id = $request->vendedor_id;
+    // === misma lógica de vendedores() para armar $rendimientoVendedores ===
+    $vendedoresQuery = User::whereHas('ganados')
+        ->orWhereHas('maquinarias')
+        ->orWhereHas('organicos');
 
-        // === misma lógica de vendedores() para armar $rendimientoVendedores ===
-        $vendedoresQuery = User::whereHas('ganados')
-            ->orWhereHas('maquinarias')
-            ->orWhereHas('organicos');
-
-        if ($vendedor_id) {
-            $vendedoresQuery->where('id', $vendedor_id);
-        }
-
-        $vendedores = $vendedoresQuery->get();
-        $rendimientoVendedores = [];
-
-        foreach ($vendedores as $vendedor) {
-            $totalGanados     = $vendedor->ganados()->count();
-            $totalMaquinarias = $vendedor->maquinarias()->count();
-            $totalOrganicos   = $vendedor->organicos()->count();
-            $totalProductos   = $totalGanados + $totalMaquinarias + $totalOrganicos;
-
-            $ventasGanado = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
-                ->join('ganados', 'pedido_detalles.product_id', '=', 'ganados.id')
-                ->where('pedido_detalles.product_type', 'ganado')
-                ->where('ganados.user_id', $vendedor->id)
-                ->whereBetween('pedidos.created_at', [$desde, $hasta])
-                ->sum('pedido_detalles.subtotal');
-
-            $ventasMaquinaria = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
-                ->join('maquinarias', 'pedido_detalles.product_id', '=', 'maquinarias.id')
-                ->where('pedido_detalles.product_type', 'maquinaria')
-                ->where('maquinarias.user_id', $vendedor->id)
-                ->whereBetween('pedidos.created_at', [$desde, $hasta])
-                ->sum('pedido_detalles.subtotal');
-
-            $ventasOrganico = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
-                ->join('organicos', 'pedido_detalles.product_id', '=', 'organicos.id')
-                ->where('pedido_detalles.product_type', 'organico')
-                ->where('organicos.user_id', $vendedor->id)
-                ->whereBetween('pedidos.created_at', [$desde, $hasta])
-                ->sum('pedido_detalles.subtotal');
-
-            $totalVentas = $ventasGanado + $ventasMaquinaria + $ventasOrganico;
-
-            $rendimientoVendedores[] = [
-                'nombre'           => $vendedor->name,
-                'email'            => $vendedor->email,
-                'total_productos'  => $totalProductos,
-                'total_ganados'    => $totalGanados,
-                'total_maquinarias' => $totalMaquinarias,
-                'total_organicos'  => $totalOrganicos,
-                'total_ventas'     => $totalVentas,
-            ];
-        }
-
-        // ordenar por ventas desc
-        usort($rendimientoVendedores, function ($a, $b) {
-            return $b['total_ventas'] <=> $a['total_ventas'];
-        });
-
-        $totalVendedores = count($rendimientoVendedores);
-        $totalProductos  = array_sum(array_column($rendimientoVendedores, 'total_productos'));
-        $ventasTotales   = array_sum(array_column($rendimientoVendedores, 'total_ventas'));
-
-        // === generar HTML usando una vista Blade ===
-        $html = view('admin.reportes.vendedores_pdf', [
-            'desde'                => $desde,
-            'hasta'                => $hasta,
-            'vendedor_id'          => $vendedor_id,
-            'rendimientoVendedores' => $rendimientoVendedores,
-            'totalVendedores'      => $totalVendedores,
-            'totalProductos'       => $totalProductos,
-            'ventasTotales'        => $ventasTotales,
-        ])->render();
-
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('a4', 'portrait');
-        $dompdf->render();
-
-        $fechaArchivo = Carbon::now()->format('Y-m-d_His');
-
-        return response($dompdf->output(), 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header(
-                'Content-Disposition',
-                'attachment; filename="reporte_vendedores_' . $fechaArchivo . '.pdf"'
-            );
+    if ($vendedor_id) {
+        $vendedoresQuery->where('id', $vendedor_id);
     }
+
+    $vendedores = $vendedoresQuery->get();
+    $rendimientoVendedores = [];
+
+    foreach ($vendedores as $vendedor) {
+        $totalGanados     = $vendedor->ganados()->count();
+        $totalMaquinarias = $vendedor->maquinarias()->count();
+        $totalOrganicos   = $vendedor->organicos()->count();
+        $totalProductos   = $totalGanados + $totalMaquinarias + $totalOrganicos;
+
+        $ventasGanado = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
+            ->join('ganados', 'pedido_detalles.product_id', '=', 'ganados.id')
+            ->where('pedido_detalles.product_type', 'ganado')
+            ->where('ganados.user_id', $vendedor->id)
+            ->whereBetween('pedidos.created_at', [$desde, $hasta])
+            ->sum('pedido_detalles.subtotal');
+
+        $ventasMaquinaria = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
+            ->join('maquinarias', 'pedido_detalles.product_id', '=', 'maquinarias.id')
+            ->where('pedido_detalles.product_type', 'maquinaria')
+            ->where('maquinarias.user_id', $vendedor->id)
+            ->whereBetween('pedidos.created_at', [$desde, $hasta])
+            ->sum('pedido_detalles.subtotal');
+
+        $ventasOrganico = PedidoDetalle::join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
+            ->join('organicos', 'pedido_detalles.product_id', '=', 'organicos.id')
+            ->where('pedido_detalles.product_type', 'organico')
+            ->where('organicos.user_id', $vendedor->id)
+            ->whereBetween('pedidos.created_at', [$desde, $hasta])
+            ->sum('pedido_detalles.subtotal');
+
+        $totalVentas = $ventasGanado + $ventasMaquinaria + $ventasOrganico;
+
+        $rendimientoVendedores[] = [
+            'nombre'            => $vendedor->name,
+            'email'             => $vendedor->email,
+            'total_productos'   => $totalProductos,
+            'total_ganados'     => $totalGanados,
+            'total_maquinarias' => $totalMaquinarias,
+            'total_organicos'   => $totalOrganicos,
+            'total_ventas'      => $totalVentas,
+        ];
+    }
+
+    // ordenar por ventas desc
+    usort($rendimientoVendedores, function ($a, $b) {
+        return $b['total_ventas'] <=> $a['total_ventas'];
+    });
+
+    $totalVendedores = count($rendimientoVendedores);
+    $totalProductos  = array_sum(array_column($rendimientoVendedores, 'total_productos'));
+    $ventasTotales   = array_sum(array_column($rendimientoVendedores, 'total_ventas'));
+
+    // Generar PDF con el facade Pdf
+    $pdf = Pdf::loadView('admin.reportes.vendedores_pdf', [
+        'desde'                 => $desde,
+        'hasta'                 => $hasta,
+        'vendedor_id'           => $vendedor_id,
+        'rendimientoVendedores' => $rendimientoVendedores,
+        'totalVendedores'       => $totalVendedores,
+        'totalProductos'        => $totalProductos,
+        'ventasTotales'         => $ventasTotales,
+    ]);
+
+    $fechaArchivo = Carbon::now()->format('Y-m-d_His');
+
+    return $pdf->download('reporte_vendedores_' . $fechaArchivo . '.pdf');
+}
 
 
 
@@ -897,31 +882,22 @@ class ReporteController extends Controller
         }
 
         if ($tipo === 'pdf') {
-            $fechaArchivo = Carbon::now()->format('Y-m-d_His');
+    $fechaArchivo = Carbon::now()->format('Y-m-d_His');
 
-            $html = view('admin.reportes.productos_lentos_pdf', [
-                'productos'       => $productos,
-                'desde'           => $desde,
-                'hasta'           => $hasta,
-                'categoria'       => $categoria,
-                'minVentas'       => $minVentas,
-                'totalProductos'  => $productos->count(),
-                'sinVentas'       => $productos->where('total_vendido', 0)->count(),
-                'conPocasVentas'  => $productos->where('total_vendido', '>', 0)->count(),
-            ])->render();
+    $pdf = Pdf::loadView('admin.reportes.productos_lentos_pdf', [
+        'productos'       => $productos,
+        'desde'           => $desde,
+        'hasta'           => $hasta,
+        'categoria'       => $categoria,
+        'minVentas'       => $minVentas,
+        'totalProductos'  => $productos->count(),
+        'sinVentas'       => $productos->where('total_vendido', 0)->count(),
+        'conPocasVentas'  => $productos->where('total_vendido', '>', 0)->count(),
+    ]);
 
-            $dompdf = new \Dompdf\Dompdf();
+    return $pdf->download('reporte_productos_lentos_' . $fechaArchivo . '.pdf');
+}
 
-            $dompdf->loadHtml($html, 'UTF-8');
-
-            $dompdf->setPaper('a4', 'portrait');
-
-            $dompdf->render();
-
-            return response($dompdf->output(), 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="reporte_productos_lentos_' . $fechaArchivo . '.pdf"');
-        }
 
         abort(404);
     }
