@@ -11,14 +11,33 @@ use Illuminate\Support\Facades\DB;
 
 class PedidoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pedidos = Pedido::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Pedido::where('user_id', Auth::id());
+
+        if ($request->filled('pedido_id')) {
+            $query->where('id', $request->pedido_id);
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('desde')) {
+            $query->whereDate('created_at', '>=', $request->desde);
+        }
+
+        if ($request->filled('hasta')) {
+            $query->whereDate('created_at', '<=', $request->hasta);
+        }
+
+        $pedidos = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('pedidos.index', compact('pedidos'));
     }
+
 
     public function show(Pedido $pedido)
     {

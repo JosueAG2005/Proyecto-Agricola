@@ -151,6 +151,17 @@
                                         </p>
                                     </a>
                                 </li>
+
+                                {{-- ===== MIS PEDIDOS ===== --}}
+                                <li class="nav-item">
+                                    <a href="{{ route('pedidos.index') }}"
+                                        class="nav-link {{ request()->routeIs('pedidos.*') ? 'active' : '' }}">
+                                        <i class="nav-icon fas fa-receipt"></i>
+                                        <p>
+                                            Mis Pedidos
+                                        </p>
+                                    </a>
+                                </li>
                             @endif
 
 
@@ -358,7 +369,8 @@
                     <h5 class="modal-title" id="confirmDeleteModalLabel">
                         <i class="fas fa-exclamation-triangle mr-2"></i>Confirmar Acción
                     </h5>
-                    <button type="button" class="close" id="confirmModalClose" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" id="confirmModalClose" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -401,29 +413,31 @@
                 // Detectar el tipo de acción basado en el mensaje o la ruta
                 var actionType = 'delete'; // Por defecto
                 var actionUrl = $form.attr('action') || '';
-                
+
                 // Detectar si es aprobación o rechazo
                 if (message.includes('Aprobar') || message.includes('aprob') || actionUrl.includes('aprobar')) {
                     actionType = 'approve';
-                } else if (message.includes('Rechazar') || message.includes('rechaz') || actionUrl.includes('rechazar')) {
+                } else if (message.includes('Rechazar') || message.includes('rechaz') || actionUrl.includes(
+                        'rechazar')) {
                     actionType = 'reject';
-                } else if (message.includes('Eliminar') || message.includes('elimin') || actionUrl.includes('destroy') || actionUrl.includes('delete')) {
+                } else if (message.includes('Eliminar') || message.includes('elimin') || actionUrl.includes(
+                        'destroy') || actionUrl.includes('delete')) {
                     actionType = 'delete';
                 }
-                
+
                 // Configurar el modal según el tipo de acción
                 var modalHeader = $('#confirmModalHeader');
                 var modalTitle = $('#confirmDeleteModalLabel');
                 var modalIcon = $('#confirmModalIcon');
                 var modalButton = $('#confirmModalButton');
                 var modalWarning = $('#confirmDeleteWarning');
-                
+
                 // Resetear clases
                 modalHeader.removeClass('bg-danger bg-success bg-warning').addClass('bg-primary');
                 modalButton.removeClass('btn-danger btn-success btn-warning').addClass('btn-primary');
-                
+
                 var modalClose = $('#confirmModalClose');
-                
+
                 if (actionType === 'approve') {
                     modalHeader.removeClass('bg-primary').addClass('bg-success text-white');
                     modalTitle.html('<i class="fas fa-check-circle mr-2"></i>Confirmar Aprobación');
@@ -450,11 +464,11 @@
                     modalWarning.text('Esta acción no se puede deshacer.');
                     modalClose.removeClass('text-dark').addClass('text-white');
                 }
-                
+
                 // Configurar el modal
                 $('#confirmDeleteMessage').text(message);
                 $('#confirmDeleteForm').attr('action', actionUrl);
-                
+
                 // Copiar el método del formulario original
                 var formMethod = $form.attr('method') || 'POST';
                 $('#confirmDeleteForm').attr('method', formMethod);
@@ -572,10 +586,11 @@
                 e.preventDefault();
                 var $form = $(this);
                 var originalOnsubmit = $form.attr('onsubmit');
-                
+
                 if (originalOnsubmit) {
                     var messageMatch = originalOnsubmit.match(/confirm\(['"](.*?)['"]\)/);
-                    var message = messageMatch ? messageMatch[1] : '¿Está seguro de eliminar este registro?';
+                    var message = messageMatch ? messageMatch[1] :
+                    '¿Está seguro de eliminar este registro?';
                     showConfirmModal($form, message);
                 }
             });
